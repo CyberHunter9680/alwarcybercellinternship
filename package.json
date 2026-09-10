@@ -2,9 +2,10 @@
   "name": "alwar-police-cyber-internship",
   "version": "1.0.0",
   "description": "Alwar Police Cyber Security Internship Portal & Realtime Admin Dashboard",
-  "main": "app.js",
+  "main": "server.js",
   "scripts": {
-    "start": "serve ."
+    "start": "node server.js",
+    "dev": "node server.js"
   },
   "dependencies": {
     "@neondatabase/serverless": "^0.10.4",
