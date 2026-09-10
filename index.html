@@ -1,0 +1,653 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
+  <title>Cyber Security Internship Portal | Alwar Police, Rajasthan</title>
+  <meta name="description" content="Official Cyber Security Internship Application Portal - Alwar District Police, Rajasthan.">
+  <meta name="theme-color" content="#060d19">
+
+  <!-- Google Fonts: Outfit, Inter & Rajdhani for ultra crisp readability -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500;700&family=Outfit:wght@500;600;700;800;900&family=Rajdhani:wght@600;700;800&display=swap" rel="stylesheet">
+  
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+  <!-- Site Navigation Header -->
+  <header class="site-header">
+    <div class="header-inner">
+      <a href="#" class="brand-wrapper" onclick="window.location.hash='#form'; return false;" aria-label="Home">
+        <div class="logo-glow-wrapper">
+          <img src="assets/Rajasthan-Police.webp" alt="Rajasthan Police Logo" class="police-emblem">
+        </div>
+        <div class="brand-text">
+          <span class="dept-tag">OFFICE OF THE SUPERINTENDENT OF POLICE, ALWAR</span>
+          <h1 class="brand-title">ALWAR CYBER POLICE <span>INTERNSHIP PROGRAM</span></h1>
+          <span class="brand-subtitle">Rajasthan Police • Cyber Defense & Investigation Division</span>
+        </div>
+      </a>
+
+      <!-- Official Security Badge in Header -->
+      <div class="header-official-badge">
+        <span class="live-dot"></span>
+        <span>Official Police Portal</span>
+      </div>
+    </div>
+  </header>
+
+  <main class="main-wrapper">
+
+    <!-- Hero Announcement Banner -->
+    <section class="hero-banner" id="heroBanner">
+      <div class="hero-content">
+        <div class="hero-badge-strip">
+          <span class="live-pulse"></span>
+          <span>Alwar Police Cyber Security Internship Program • 2026 Batch</span>
+        </div>
+        <h2 class="hero-heading">
+          Apply for Cyber Security Internship at <span class="highlight-gold">Alwar Police Cyber Cell</span>
+        </h2>
+        <p class="hero-desc">
+          An exclusive hands-on internship initiative by Alwar Police (Rajasthan Police Cyber Wing) providing technical students real-world exposure to Digital Forensics, Cyber Crime Investigation, Network Defense, Threat Intelligence, and OSINT.
+        </p>
+
+        <!-- Summary Cards -->
+        <div class="hero-stats-row">
+          <div class="hero-stat-pill">
+            <div class="stat-pill-icon">📍</div>
+            <div class="stat-pill-text">
+              <span class="pill-label">Location</span>
+              <span class="pill-val">Cyber Cell, SP Office, Alwar (Raj.)</span>
+            </div>
+          </div>
+          <div class="hero-stat-pill">
+            <div class="stat-pill-icon">⏱️</div>
+            <div class="stat-pill-text">
+              <span class="pill-label">Duration Options</span>
+              <span class="pill-val">1 to 4 Months (Flexible Selection)</span>
+            </div>
+          </div>
+          <div class="hero-stat-pill">
+            <div class="stat-pill-icon">📜</div>
+            <div class="stat-pill-text">
+              <span class="pill-label">Certification</span>
+              <span class="pill-val">Authorized Rajasthan Police Certificate</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- VIEW 1: INTERNSHIP APPLICATION FORM -->
+    <section id="formView" class="view-section active">
+      <div class="form-card">
+        
+        <div class="form-header-bar">
+          <div class="form-header-title">
+            <div class="form-icon-shield">
+              <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path>
+              </svg>
+            </div>
+            <div>
+              <h2 class="form-title-text">Internship Application Form</h2>
+              <p class="form-subtitle-text">Please fill in all details accurately (* indicates required fields)</p>
+            </div>
+          </div>
+          <div class="required-pill">
+            <span>* Required Fields</span>
+          </div>
+        </div>
+
+        <form id="internshipForm" onsubmit="handleFormSubmit(event)" novalidate>
+
+          <!-- SECTION 1: Personal Information -->
+          <div class="form-section-block">
+            <div class="section-badge">
+              <span class="step-number">1</span>
+              <span>Personal Information</span>
+            </div>
+
+            <div class="form-grid">
+              <!-- 1. Student Name -->
+              <div class="form-group" id="group-studentName">
+                <label class="form-label" for="studentName">
+                  <span>Student Full Name <span class="req">*</span></span>
+                </label>
+                <div class="input-with-icon">
+                  <svg class="input-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+                  </svg>
+                  <input type="text" id="studentName" class="form-control" placeholder="e.g. Rahul Sharma" required autocomplete="name">
+                </div>
+                <span class="field-error-msg">Please enter student full name</span>
+              </div>
+
+              <!-- 2. Mobile Number -->
+              <div class="form-group" id="group-mobile">
+                <label class="form-label" for="mobile">
+                  <span>Mobile Number <span class="req">*</span></span>
+                  <span class="form-label-hint">WhatsApp Enabled</span>
+                </label>
+                <div class="input-with-icon">
+                  <span class="phone-prefix">+91</span>
+                  <input type="tel" id="mobile" class="form-control with-prefix" placeholder="9876543210" pattern="[6-9][0-9]{9}" maxlength="10" required autocomplete="tel">
+                </div>
+                <span class="field-error-msg">Please enter a valid 10-digit mobile number</span>
+              </div>
+
+              <!-- 3. Email -->
+              <div class="form-group col-span-2-desktop" id="group-email">
+                <label class="form-label" for="email">
+                  <span>Email Address <span class="req">*</span></span>
+                  <span class="form-label-hint">Official updates will be sent here</span>
+                </label>
+                <div class="input-with-icon">
+                  <svg class="input-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 12a4 4 0 10-8 0 4 4 0 008 0zm0 0v1.5a2.5 2.5 0 005 0V12a9 9 0 10-9 9m4.5-1.206a8.959 8.959 0 01-4.5 1.206"></path>
+                  </svg>
+                  <input type="email" id="email" class="form-control" placeholder="rahul.cyber@gmail.com" required autocomplete="email">
+                </div>
+                <span class="field-error-msg">Please enter a valid email address</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- SECTION 2: Academic Background & Duration -->
+          <div class="form-section-block">
+            <div class="section-badge">
+              <span class="step-number">2</span>
+              <span>Academic Background & Preferred Duration</span>
+            </div>
+
+            <div class="form-grid">
+              <!-- 4. Course -->
+              <div class="form-group" id="group-course">
+                <label class="form-label" for="course">
+                  <span>Course / Degree <span class="req">*</span></span>
+                </label>
+                <div class="input-with-icon">
+                  <svg class="input-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 14l9-5-9-5-9 5 9 5z"></path>
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 14l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z"></path>
+                  </svg>
+                  <select id="course" class="form-control" required>
+                    <option value="">-- Select Your Course --</option>
+                    <option value="B.Tech Computer Science / IT">B.Tech Computer Science / IT</option>
+                    <option value="B.Tech Cyber Security / AI">B.Tech Cyber Security / AI</option>
+                    <option value="BCA (Bachelor of Computer Applications)">BCA (Bachelor of Computer Applications)</option>
+                    <option value="MCA (Master of Computer Applications)">MCA (Master of Computer Applications)</option>
+                    <option value="B.Sc Computer Science / IT">B.Sc Computer Science / IT</option>
+                    <option value="M.Sc Cyber Security / Forensics">M.Sc Cyber Security / Forensics</option>
+                    <option value="M.Tech Information Security">M.Tech Information Security</option>
+                    <option value="Diploma in Cyber Security / CS">Diploma in Cyber Security / CS</option>
+                    <option value="Other Technical Degree">Other Technical Degree</option>
+                  </select>
+                </div>
+                <span class="field-error-msg">Please select your course</span>
+              </div>
+
+              <!-- 5. Year / Semester -->
+              <div class="form-group" id="group-yearSem">
+                <label class="form-label" for="yearSem">
+                  <span>Year / Semester <span class="req">*</span></span>
+                </label>
+                <div class="input-with-icon">
+                  <svg class="input-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                  </svg>
+                  <select id="yearSem" class="form-control" required>
+                    <option value="">-- Select Year / Semester --</option>
+                    <option value="1st Year (Semester 1 & 2)">1st Year (Semester 1 & 2)</option>
+                    <option value="2nd Year (Semester 3 & 4)">2nd Year (Semester 3 & 4)</option>
+                    <option value="3rd Year (Semester 5 & 6)">3rd Year (Semester 5 & 6)</option>
+                    <option value="4th Year / Final Year (Semester 7 & 8)">4th Year / Final Year (Semester 7 & 8)</option>
+                    <option value="Passout / Graduate (2025-2026)">Passout / Graduate (2025-2026)</option>
+                  </select>
+                </div>
+                <span class="field-error-msg">Please select your year or semester</span>
+              </div>
+
+              <!-- 6. Internship Duration -->
+              <div class="form-group col-span-2-desktop" id="group-duration">
+                <label class="form-label" for="internshipDuration">
+                  <span>Select Internship Duration <span class="req">*</span></span>
+                  <span class="form-label-hint">Choose your preferred duration</span>
+                </label>
+                <div class="input-with-icon">
+                  <svg class="input-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                  </svg>
+                  <select id="internshipDuration" class="form-control" required>
+                    <option value="">-- Select Preferred Duration --</option>
+                    <option value="1 Month (4 Weeks)">1 Month (4 Weeks)</option>
+                    <option value="2 Months (8 Weeks)">2 Months (8 Weeks)</option>
+                    <option value="3 Months (12 Weeks)">3 Months (12 Weeks)</option>
+                    <option value="4 Months (16 Weeks)">4 Months (16 Weeks)</option>
+                  </select>
+                </div>
+                <span class="field-error-msg">Please select your preferred internship duration</span>
+              </div>
+
+              <!-- 7. University / College -->
+              <div class="form-group col-span-2-desktop" id="group-college">
+                <label class="form-label" for="college">
+                  <span>University / College <span class="req">*</span></span>
+                </label>
+                <div class="input-with-icon">
+                  <svg class="input-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path>
+                  </svg>
+                  <input type="text" id="college" class="form-control" placeholder="e.g. Raj Rishi Govt Autonomous College Alwar / RTU / MNIT" required list="collegeSuggestions">
+                  <datalist id="collegeSuggestions">
+                    <option value="Raj Rishi Govt Autonomous College, Alwar">
+                    <option value="Lords University, Alwar">
+                    <option value="SunRise University, Alwar">
+                    <option value="Govt Polytechnic College, Alwar">
+                    <option value="IET Alwar (Institute of Engineering & Technology)">
+                    <option value="Malaviya National Institute of Technology (MNIT), Jaipur">
+                    <option value="Rajasthan Technical University (RTU), Kota">
+                    <option value="University of Rajasthan, Jaipur">
+                    <option value="Poornima University / PIET, Jaipur">
+                    <option value="JECRC University, Jaipur">
+                    <option value="Manipal University, Jaipur">
+                    <option value="National Forensic Sciences University (NFSU)">
+                  </datalist>
+                </div>
+                <span class="field-error-msg">Please enter your college or university name</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- SECTION 3: Technical Skills & Motivation -->
+          <div class="form-section-block">
+            <div class="section-badge">
+              <span class="step-number">3</span>
+              <span>Technical Skills & Statement of Purpose</span>
+            </div>
+
+            <div class="form-grid">
+              <!-- 8. Skills -->
+              <div class="form-group col-span-2-desktop" id="group-skills">
+                <label class="form-label">
+                  <span>Cyber Security & Technical Skills <span class="req">*</span></span>
+                  <span class="form-label-hint">Tap on the skills you have</span>
+                </label>
+                
+                <div class="skills-tags-container" id="presetSkillsContainer">
+                  <button type="button" class="skill-chip" data-skill="Network Security" onclick="toggleSkill(this)">
+                    <span class="chip-dot"></span> Network Security
+                  </button>
+                  <button type="button" class="skill-chip" data-skill="Ethical Hacking" onclick="toggleSkill(this)">
+                    <span class="chip-dot"></span> Ethical Hacking
+                  </button>
+                  <button type="button" class="skill-chip" data-skill="Digital Forensics" onclick="toggleSkill(this)">
+                    <span class="chip-dot"></span> Digital Forensics
+                  </button>
+                  <button type="button" class="skill-chip" data-skill="Python / Scripting" onclick="toggleSkill(this)">
+                    <span class="chip-dot"></span> Python / Scripting
+                  </button>
+                  <button type="button" class="skill-chip" data-skill="Linux / Kali" onclick="toggleSkill(this)">
+                    <span class="chip-dot"></span> Linux / Kali
+                  </button>
+                  <button type="button" class="skill-chip" data-skill="OSINT Investigation" onclick="toggleSkill(this)">
+                    <span class="chip-dot"></span> OSINT Investigation
+                  </button>
+                  <button type="button" class="skill-chip" data-skill="Web Security / OWASP" onclick="toggleSkill(this)">
+                    <span class="chip-dot"></span> Web Security / OWASP
+                  </button>
+                  <button type="button" class="skill-chip" data-skill="Cryptography" onclick="toggleSkill(this)">
+                    <span class="chip-dot"></span> Cryptography
+                  </button>
+                  <button type="button" class="skill-chip" data-skill="Wireshark / Packets" onclick="toggleSkill(this)">
+                    <span class="chip-dot"></span> Wireshark / Packets
+                  </button>
+                </div>
+
+                <!-- Custom Skill Input -->
+                <div class="custom-skill-wrapper">
+                  <input type="text" id="customSkillInput" class="custom-skill-input" placeholder="Add custom skill (e.g. SIEM, Splunk, Reverse Engineering)...">
+                  <button type="button" class="btn-add-skill" onclick="addCustomSkill()">+ Add Skill</button>
+                </div>
+                <input type="hidden" id="selectedSkillsJson" value="[]">
+                <span class="field-error-msg">Please select or add at least one technical skill</span>
+              </div>
+
+              <!-- 9. Why Join Internship? -->
+              <div class="form-group col-span-2-desktop" id="group-whyJoin">
+                <label class="form-label" for="whyJoin">
+                  <span>Why do you want to join this Cyber Security Internship? <span class="req">*</span></span>
+                </label>
+                <textarea id="whyJoin" class="form-control" rows="4" placeholder="Describe your motivation, past projects, areas of interest in cyber security, and how you can contribute to police cyber defense..." required minlength="30" maxlength="1200" oninput="updateCharCounter(this)"></textarea>
+                <div class="char-counter"><span id="whyJoinCount">0</span> / 1200 characters (minimum 30 characters)</div>
+                <span class="field-error-msg">Please write at least 30 characters explaining your motivation</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- SECTION 4: Resume & Ethics Declaration -->
+          <div class="form-section-block">
+            <div class="section-badge">
+              <span class="step-number">4</span>
+              <span>Resume Upload & Verification</span>
+            </div>
+
+            <div class="form-grid">
+              <!-- 10. Resume Upload -->
+              <div class="form-group col-span-2-desktop" id="group-resume">
+                <label class="form-label">
+                  <span>Upload Resume / CV <span class="req">*</span></span>
+                  <span class="form-label-hint">PDF, DOC, DOCX (Max 5MB)</span>
+                </label>
+                
+                <div class="file-drop-zone" id="resumeDropZone" onclick="document.getElementById('resumeFileInput').click()">
+                  <div class="file-icon-box">
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path>
+                    </svg>
+                  </div>
+                  <div class="file-drop-title">
+                    <span>Browse File or Drag & Drop</span> (Tap to Upload)
+                  </div>
+                  <div class="file-drop-hint">Supported formats: .pdf, .doc, .docx (Max 5MB)</div>
+                  <input type="file" id="resumeFileInput" style="display:none;" accept=".pdf,.doc,.docx" onchange="handleFileSelect(this)">
+                </div>
+
+                <!-- Live File Preview Card -->
+                <div class="file-preview-card" id="filePreviewCard">
+                  <div class="file-preview-info">
+                    <div class="doc-icon">📄</div>
+                    <div>
+                      <div class="file-name" id="fileNameDisplay">resume.pdf</div>
+                      <div class="file-size" id="fileSizeDisplay">1.2 MB</div>
+                    </div>
+                  </div>
+                  <button type="button" class="btn-remove-file" onclick="removeSelectedFile()" title="Remove file">
+                    ✕
+                  </button>
+                </div>
+                <span class="field-error-msg">Please upload your resume file</span>
+              </div>
+
+              <!-- 11. Declaration & Ethics Pledge -->
+              <div class="form-group col-span-2-desktop">
+                <label class="checkbox-label">
+                  <input type="checkbox" id="pledgeCheck" required>
+                  <span class="checkbox-text">
+                    I hereby declare that all information provided is true and accurate to the best of my knowledge. I agree to abide by the confidentiality policies and code of ethics of the Police Department during the cyber security internship.
+                  </span>
+                </label>
+                <span class="field-error-msg">Please agree to the ethics and truthfulness declaration</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Form Action Buttons -->
+          <div class="form-actions">
+            <button type="button" class="btn-reset" onclick="resetApplicationForm()">Reset Form</button>
+            <button type="submit" class="btn-submit" id="submitBtn">
+              <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+              </svg>
+              <span>Submit Application</span>
+            </button>
+          </div>
+        </form>
+      </div>
+    </section>
+
+    <!-- VIEW 2: CLEAN REALTIME ADMIN DASHBOARD (ACCESSIBLE ONLY VIA /admin or #admin) -->
+    <section id="dashboardView" class="view-section">
+
+      <!-- Admin Top Header Banner -->
+      <div class="admin-top-banner">
+        <div class="admin-banner-info">
+          <div class="admin-shield-icon">🛡️</div>
+          <div>
+            <h3 class="admin-banner-title">Cyber Cell Officer Review Portal</h3>
+            <p class="admin-banner-subtitle">
+              <span id="dbSyncStatus" class="db-sync-badge">🟢 Realtime Neon Database Active</span>
+              • Total Applicants: <strong id="metricTotal" style="color:var(--gold-primary);">0</strong>
+            </p>
+          </div>
+        </div>
+        <button class="btn-action btn-refresh" onclick="exitAdminPortal()" title="Exit to Public Form">
+          <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path>
+          </svg>
+          <span>Exit / Return to Form</span>
+        </button>
+      </div>
+
+      <!-- Dashboard Controls & Search Bar -->
+      <div class="dashboard-controls">
+        <div class="search-filter-group">
+          <div class="search-box">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+            </svg>
+            <input type="text" id="dashboardSearchInput" placeholder="Search by student name, college, mobile, email, duration, skills..." oninput="filterApplicants()">
+          </div>
+
+          <select id="durationFilter" class="filter-select" onchange="filterApplicants()">
+            <option value="ALL">All Durations</option>
+            <option value="1 Month">1 Month</option>
+            <option value="2 Months">2 Months</option>
+            <option value="3 Months">3 Months</option>
+            <option value="4 Months">4 Months</option>
+          </select>
+
+          <select id="courseFilter" class="filter-select" onchange="filterApplicants()">
+            <option value="ALL">All Courses</option>
+            <option value="B.Tech">B.Tech</option>
+            <option value="BCA">BCA</option>
+            <option value="MCA">MCA</option>
+            <option value="M.Sc">M.Sc / M.Tech</option>
+            <option value="Other">Other</option>
+          </select>
+        </div>
+
+        <div class="action-btn-group">
+          <button class="btn-action btn-export" onclick="exportApplicantsCSV()">
+            <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
+            </svg>
+            <span>Excel / CSV</span>
+          </button>
+          <button class="btn-action btn-refresh" onclick="loadDashboardData()" title="Refresh database">
+            <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+            </svg>
+            <span>Sync</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Clean Applicant Data Table -->
+      <div class="table-card">
+        <div class="table-responsive">
+          <table class="applicant-table">
+            <thead>
+              <tr>
+                <th>App ID & Date</th>
+                <th>Student Name & Contact</th>
+                <th>Duration</th>
+                <th>Course / Year</th>
+                <th>College / University</th>
+                <th>Skills</th>
+                <th>Why Join (SOP)</th>
+                <th>Resume</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody id="applicantTableBody">
+              <!-- Rendered dynamically -->
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Mobile Card List View -->
+        <div id="mobileApplicantCards" class="mobile-applicant-list">
+          <!-- Rendered dynamically in mobile view -->
+        </div>
+
+        <div id="emptyState" class="empty-state" style="display: none;">
+          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"></path>
+          </svg>
+          <p>No applicant records found in database.</p>
+        </div>
+      </div>
+
+    </section>
+
+  </main>
+
+  <!-- SITE FOOTER WITH DEVELOPED BY ATTRIBUTION -->
+  <footer class="site-footer">
+    <div class="footer-inner">
+      <div class="footer-dept-info">
+        <span>© 2026 Alwar Police • Rajasthan Police Cyber Defense Cell</span>
+      </div>
+      <div class="footer-dev-tag">
+        Developed by <strong class="dev-name">Abhishek Sharma</strong>
+      </div>
+    </div>
+  </footer>
+
+  <!-- SUCCESS ACKNOWLEDGEMENT MODAL -->
+  <div class="modal-overlay" id="successModal">
+    <div class="modal-dialog">
+      <div class="modal-header">
+        <div class="modal-title">
+          <svg width="22" height="22" fill="currentColor" color="#4ade80" viewBox="0 0 20 20">
+            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+          </svg>
+          Application Submitted Successfully!
+        </div>
+        <button class="btn-modal-close" onclick="closeModal('successModal')" aria-label="Close">✕</button>
+      </div>
+      <div class="modal-body">
+        <div class="success-card">
+          <div class="success-seal">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path>
+            </svg>
+          </div>
+          <h3 class="success-title">Alwar Police Cyber Security Internship 2026</h3>
+          <p class="success-subtitle">Your internship application has been officially registered in the database.</p>
+          
+          <div class="app-id-container">
+            <span class="app-id-label">Application Reference ID:</span>
+            <div class="app-id-badge">
+              <span id="slipAppId">RJ-ALW-CYBER-2026-0000</span>
+              <button class="btn-copy-id" onclick="copyAppId()" title="Copy Application ID">📋</button>
+            </div>
+          </div>
+
+          <div class="slip-details-grid">
+            <div class="slip-detail-item">
+              <span class="slip-label">Student Name:</span>
+              <span class="slip-val" id="slipName">-</span>
+            </div>
+            <div class="slip-detail-item">
+              <span class="slip-label">Duration:</span>
+              <span class="slip-val" id="slipDuration">-</span>
+            </div>
+            <div class="slip-detail-item">
+              <span class="slip-label">Course / Year:</span>
+              <span class="slip-val" id="slipCourse">-</span>
+            </div>
+            <div class="slip-detail-item">
+              <span class="slip-label">College:</span>
+              <span class="slip-val" id="slipCollege">-</span>
+            </div>
+            <div class="slip-detail-item">
+              <span class="slip-label">Mobile Number:</span>
+              <span class="slip-val" id="slipMobile">-</span>
+            </div>
+            <div class="slip-detail-item">
+              <span class="slip-label">Email Address:</span>
+              <span class="slip-val" id="slipEmail">-</span>
+            </div>
+          </div>
+
+          <p class="verification-note">
+            ℹ️ Shortlisted candidates will be notified via email and WhatsApp regarding interview dates and onboarding instructions.
+          </p>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-action btn-refresh" onclick="window.print()">
+          <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path>
+          </svg>
+          <span>Print Acknowledgement Slip</span>
+        </button>
+        <button class="btn-action btn-export" onclick="closeModal('successModal');">
+          <span>Done</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- RESUME VIEWER MODAL -->
+  <div class="modal-overlay" id="resumeViewerModal">
+    <div class="modal-dialog" style="max-width: 850px; height: 85vh; display: flex; flex-direction: column;">
+      <div class="modal-header">
+        <div class="modal-title">
+          <span style="font-size: 1.3rem;">📄</span>
+          <span id="resumeViewerTitle">Resume Preview</span>
+        </div>
+        <div style="display: flex; gap: 0.5rem; align-items: center;">
+          <button class="btn-action btn-export" id="resumeModalDownloadBtn" style="font-size: 0.8rem; padding: 0.35rem 0.8rem;">
+            Download
+          </button>
+          <button class="btn-modal-close" onclick="closeModal('resumeViewerModal')">✕</button>
+        </div>
+      </div>
+      <div class="modal-body" style="flex: 1; padding: 0.5rem; background: #060d19; display: flex;">
+        <iframe id="resumeViewerFrame" src="" style="width: 100%; height: 100%; border: none; border-radius: 8px; background: #fff;" title="Resume View"></iframe>
+      </div>
+    </div>
+  </div>
+
+  <!-- PIN PROMPT MODAL FOR ADMIN LOGIN -->
+  <div class="modal-overlay" id="pinModal">
+    <div class="modal-dialog" style="max-width: 420px;">
+      <div class="modal-header">
+        <div class="modal-title">
+          <svg width="20" height="20" fill="none" stroke="currentColor" color="var(--gold-primary)" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
+          </svg>
+          Officer Authentication
+        </div>
+        <button class="btn-modal-close" onclick="closeModal('pinModal'); window.location.hash='#form';">✕</button>
+      </div>
+      <div class="modal-body" style="text-align: center;">
+        <p style="font-size: 0.9rem; color: var(--text-secondary); margin-bottom: 1.2rem;">
+          Enter 4-digit security PIN to access the administrative review portal:
+        </p>
+        <div class="form-group" style="max-width: 220px; margin: 0 auto;">
+          <input type="password" id="adminPinInput" class="form-control" placeholder="••••" maxlength="4" style="text-align: center; font-size: 1.5rem; letter-spacing: 8px;" onkeyup="if(event.key==='Enter')validateAdminPin()">
+        </div>
+        <p style="font-size: 0.8rem; color: var(--text-muted); margin-top: 1rem;">
+          (Demo Security PIN: <strong style="color:var(--gold-primary);">1122</strong>)
+        </p>
+      </div>
+      <div class="modal-footer" style="justify-content: center; flex-wrap: wrap;">
+        <button class="btn-action btn-refresh" onclick="quickDemoLogin()">Quick Demo Access</button>
+        <button class="btn-submit" style="padding: 0.6rem 1.4rem; font-size: 0.95rem;" onclick="validateAdminPin()">Login</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Notification System -->
+  <div class="toast-container" id="toastContainer"></div>
+
+  <script src="app.js"></script>
+</body>
+</html>
