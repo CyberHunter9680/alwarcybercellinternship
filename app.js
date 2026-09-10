@@ -138,7 +138,7 @@ function validateAdminPin() {
   const pinInput = document.getElementById("adminPinInput");
   const enteredPin = pinInput.value.trim();
   
-  if (enteredPin === "****" || enteredPin === "admin") {
+  if (enteredPin === "1122" || enteredPin === "admin") {
     isAdminAuthenticated = true;
     closeModal("pinModal");
     pinInput.value = "";
