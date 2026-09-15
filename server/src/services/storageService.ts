@@ -3,9 +3,13 @@ import path from 'path';
 import crypto from 'crypto';
 import { ENV } from '../config/env.js';
 
-// Ensure local upload directory exists
-if (!fs.existsSync(ENV.STORAGE_DIR)) {
-  fs.mkdirSync(ENV.STORAGE_DIR, { recursive: true });
+// Ensure local upload directory exists safely
+try {
+  if (!fs.existsSync(ENV.STORAGE_DIR)) {
+    fs.mkdirSync(ENV.STORAGE_DIR, { recursive: true });
+  }
+} catch (err) {
+  console.warn('⚠️ Could not create STORAGE_DIR on startup (expected in serverless):', err);
 }
 
 export interface StoredFileInfo {
