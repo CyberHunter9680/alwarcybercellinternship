@@ -60,7 +60,7 @@ app.use('/api', apiRouter);
 // Global Error Handler
 app.use(errorHandler);
 
-// Start Server
+// Start Server if run directly (not in Vercel serverless)
 async function startServer() {
   await connectDB();
   await AdminService.seedDefaultAdmin();
@@ -81,6 +81,11 @@ async function startServer() {
   });
 }
 
-startServer();
+if (!process.env.VERCEL) {
+  startServer();
+} else {
+  // Connect DB on serverless initialization
+  connectDB().catch(console.error);
+}
 
 export default app;

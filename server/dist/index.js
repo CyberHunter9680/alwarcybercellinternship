@@ -53,7 +53,7 @@ app.use('/api', rateLimiter_js_1.generalApiLimiter);
 app.use('/api', index_js_1.default);
 // Global Error Handler
 app.use(errorHandler_js_1.errorHandler);
-// Start Server
+// Start Server if run directly (not in Vercel serverless)
 async function startServer() {
     await (0, db_js_1.connectDB)();
     await adminService_js_1.AdminService.seedDefaultAdmin();
@@ -72,5 +72,11 @@ async function startServer() {
     `);
     });
 }
-startServer();
+if (!process.env.VERCEL) {
+    startServer();
+}
+else {
+    // Connect DB on serverless initialization
+    (0, db_js_1.connectDB)().catch(console.error);
+}
 exports.default = app;
