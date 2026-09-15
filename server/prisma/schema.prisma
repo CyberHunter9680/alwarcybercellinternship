@@ -1,0 +1,113 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+enum CourseType {
+  BCA
+  B_TECH
+  MCA
+}
+
+enum AcademicYear {
+  YEAR_2
+  YEAR_3
+  YEAR_4
+}
+
+enum ApplicationStatus {
+  SUBMITTED
+  UNDER_REVIEW
+  SHORTLISTED
+  SELECTED
+  REJECTED
+}
+
+enum AdminRole {
+  SUPER_ADMIN
+  OFFICER
+  REVIEWER
+}
+
+model Application {
+  id              String            @id @default(uuid())
+  applicationId   String            @unique @map("application_id")
+  fullName        String            @map("full_name")
+  mobile          String            @unique
+  email           String            @unique
+  course          CourseType
+  year            AcademicYear
+  universityName  String            @map("university_name")
+  skills          String[]
+  customSkills    String[]          @map("custom_skills")
+  motivation      String            @db.Text
+  resumeFilename  String            @map("resume_filename")
+  resumeUrl       String            @map("resume_url")
+  resumeMimeType  String?           @map("resume_mime_type")
+  resumeSize      Int?              @map("resume_size")
+  status          ApplicationStatus @default(SUBMITTED)
+  statusRemarks   String?           @map("status_remarks") @db.Text
+  ipAddress       String?           @map("ip_address")
+  createdAt       DateTime          @default(now()) @map("created_at")
+  updatedAt       DateTime          @updatedAt @map("updated_at")
+
+  auditLogs       AuditLog[]
+
+  @@index([applicationId])
+  @@index([email])
+  @@index([mobile])
+  @@index([course])
+  @@index([year])
+  @@index([universityName])
+  @@index([status])
+  @@index([createdAt])
+  @@map("applications")
+}
+
+model Admin {
+  id           String     @id @default(uuid())
+  name         String
+  email        String     @unique
+  passwordHash String     @map("password_hash")
+  role         AdminRole  @default(OFFICER)
+  isActive     Boolean    @default(true) @map("is_active")
+  lastLoginAt  DateTime?  @map("last_login_at")
+  createdAt    DateTime   @default(now()) @map("created_at")
+  updatedAt    DateTime   @updatedAt @map("updated_at")
+
+  auditLogs    AuditLog[]
+
+  @@index([email])
+  @@map("admins")
+}
+
+model AuditLog {
+  id            String       @id @default(uuid())
+  adminId       String?      @map("admin_id")
+  admin         Admin?       @relation(fields: [adminId], references: [id], onDelete: SetNull)
+  applicationId String?      @map("application_id")
+  application   Application? @relation(fields: [applicationId], references: [id], onDelete: SetNull)
+  action        String       // LOGIN, LOGOUT, VIEW_APPLICATION, STATUS_CHANGE, DOWNLOAD_RESUME, DOWNLOAD_SLIP, EXPORT_DATA
+  details       String?      @db.Text
+  ipAddress     String?      @map("ip_address")
+  userAgent     String?      @map("user_agent")
+  createdAt     DateTime     @default(now()) @map("created_at")
+
+  @@index([adminId])
+  @@index([applicationId])
+  @@index([action])
+  @@index([createdAt])
+  @@map("audit_logs")
+}
+
+model SequenceCounter {
+  id           String @id @default("application_counter")
+  currentValue Int    @default(0) @map("current_value")
+
+  @@map("sequence_counters")
+}

@@ -1,0 +1,35 @@
+{
+  "name": "alwar-police-internship-programme",
+  "version": "1.0.0",
+  "description": "Alwar Police Internship Programme 2026 - Cyber Security Internship Portal",
+  "private": true,
+  "workspaces": [
+    "server",
+    "client"
+  ],
+  "scripts": {
+    "install:all": "npm install && npm install --workspace=server && npm install --workspace=client",
+    "dev": "concurrently \"npm run dev:server\" \"npm run dev:client\"",
+    "dev:server": "npm --workspace=server run dev",
+    "dev:client": "npm --workspace=client run dev",
+    "build": "npm --workspace=server run build && npm --workspace=client run build",
+    "prisma:generate": "npm --workspace=server run prisma:generate",
+    "prisma:migrate": "npm --workspace=server run prisma:migrate",
+    "prisma:seed": "npm --workspace=server run prisma:seed",
+    "start": "npm --workspace=server run start"
+  },
+  "devDependencies": {
+    "concurrently": "^9.1.2"
+  },
+  "keywords": [
+    "cyber-security",
+    "internship",
+    "alwar-police",
+    "react",
+    "express",
+    "prisma",
+    "postgresql"
+  ],
+  "author": "Alwar Police Department",
+  "license": "ISC"
+}
