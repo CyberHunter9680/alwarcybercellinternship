@@ -57,6 +57,29 @@ app.use('/api', generalApiLimiter);
 // Mount API routes
 app.use('/api', apiRouter);
 
+// Serve static frontend assets if built
+import path from 'path';
+import fs from 'fs';
+
+const possibleDistPaths = [
+  path.resolve(process.cwd(), 'dist'),
+  path.resolve(process.cwd(), '../dist'),
+  path.resolve(process.cwd(), 'client/dist'),
+];
+
+for (const distPath of possibleDistPaths) {
+  if (fs.existsSync(distPath) && fs.existsSync(path.join(distPath, 'index.html'))) {
+    app.use(express.static(distPath));
+    app.get('*', (req, res, next) => {
+      if (req.path.startsWith('/api')) {
+        return next();
+      }
+      res.sendFile(path.join(distPath, 'index.html'));
+    });
+    break;
+  }
+}
+
 // Global Error Handler
 app.use(errorHandler);
 
