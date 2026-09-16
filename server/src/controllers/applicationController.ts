@@ -162,22 +162,58 @@ export class ApplicationController {
   }
 
   /**
-   * Serves/streams resume file securely
+   * Serves/streams resume file securely with database-backed & multi-path fallback
    */
   static async getResume(req: Request, res: Response, next: NextFunction) {
     try {
-      const filename = req.params.filename as string;
-      const fileData = await StorageService.getResumeBuffer(filename);
+      const filenameOrId = req.params.filename as string;
 
+      // 1. Attempt to find application by ID, Application ID, or filename
+      let application = await ApplicationService.getByIdOrAppId(filenameOrId);
+      if (!application) {
+        application = await ApplicationService.getByResumeUrl(filenameOrId);
+      }
+
+      let fileData: { buffer: Buffer; mimeType: string } | null = null;
+      let displayFilename = filenameOrId;
+
+      if (application) {
+        displayFilename = application.resumeFilename || `${application.applicationId}_Resume.pdf`;
+        fileData = await StorageService.getResumeBuffer(
+          application.resumeUrl,
+          application.resumeFilename
+        );
+      }
+
+      // 2. Direct filesystem lookup fallback if not resolved via application record
       if (!fileData) {
+        fileData = await StorageService.getResumeBuffer(filenameOrId);
+      }
+
+      // 3. If file cannot be found
+      if (!fileData) {
+        if (application) {
+          return res.status(404).json({
+            success: false,
+            message: 'Resume document is unavailable for this registration. The candidate registration record is safe and intact in the database.',
+            data: {
+              applicationId: application.applicationId,
+              fullName: application.fullName,
+              resumeFilename: application.resumeFilename,
+              createdAt: application.createdAt,
+            },
+          });
+        }
         return sendError(res, 'Resume file not found', 404);
       }
 
       res.setHeader('Content-Type', fileData.mimeType);
-      res.setHeader('Content-Disposition', `inline; filename="${filename}"`);
+      res.setHeader('Content-Disposition', `inline; filename="${encodeURIComponent(displayFilename)}"`);
+      res.setHeader('Content-Length', fileData.buffer.length);
       return res.end(fileData.buffer);
     } catch (error) {
       next(error);
     }
   }
 }
+

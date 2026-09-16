@@ -135,17 +135,45 @@ class ApplicationController {
         }
     }
     /**
-     * Serves/streams resume file securely
+     * Serves/streams resume file securely with database-backed & multi-path fallback
      */
     static async getResume(req, res, next) {
         try {
-            const filename = req.params.filename;
-            const fileData = await storageService_js_1.StorageService.getResumeBuffer(filename);
+            const filenameOrId = req.params.filename;
+            // 1. Attempt to find application by ID, Application ID, or filename
+            let application = await applicationService_js_1.ApplicationService.getByIdOrAppId(filenameOrId);
+            if (!application) {
+                application = await applicationService_js_1.ApplicationService.getByResumeUrl(filenameOrId);
+            }
+            let fileData = null;
+            let displayFilename = filenameOrId;
+            if (application) {
+                displayFilename = application.resumeFilename || `${application.applicationId}_Resume.pdf`;
+                fileData = await storageService_js_1.StorageService.getResumeBuffer(application.resumeUrl, application.resumeFilename);
+            }
+            // 2. Direct filesystem lookup fallback if not resolved via application record
             if (!fileData) {
+                fileData = await storageService_js_1.StorageService.getResumeBuffer(filenameOrId);
+            }
+            // 3. If file cannot be found
+            if (!fileData) {
+                if (application) {
+                    return res.status(404).json({
+                        success: false,
+                        message: 'Resume document is unavailable for this registration. The candidate registration record is safe and intact in the database.',
+                        data: {
+                            applicationId: application.applicationId,
+                            fullName: application.fullName,
+                            resumeFilename: application.resumeFilename,
+                            createdAt: application.createdAt,
+                        },
+                    });
+                }
                 return (0, responseHelper_js_1.sendError)(res, 'Resume file not found', 404);
             }
             res.setHeader('Content-Type', fileData.mimeType);
-            res.setHeader('Content-Disposition', `inline; filename="${filename}"`);
+            res.setHeader('Content-Disposition', `inline; filename="${encodeURIComponent(displayFilename)}"`);
+            res.setHeader('Content-Length', fileData.buffer.length);
             return res.end(fileData.buffer);
         }
         catch (error) {

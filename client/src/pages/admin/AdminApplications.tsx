@@ -466,7 +466,7 @@ export const AdminApplications: React.FC = () => {
 
                         {/* Download Resume */}
                         <a
-                          href={`/api/applications/resume/${app.resumeUrl}`}
+                          href={`/api/applications/resume/${app.id}`}
                           target="_blank"
                           rel="noreferrer"
                           className="p-1.5 rounded-lg bg-slate-100 hover:bg-cyan-100 text-cyan-800 transition-colors"
@@ -592,7 +592,7 @@ export const AdminApplications: React.FC = () => {
                     <span className="font-semibold text-slate-900">{selectedApp.resumeFilename}</span>
                   </div>
                   <a
-                    href={`/api/applications/resume/${selectedApp.resumeUrl}`}
+                    href={`/api/applications/resume/${selectedApp.id}`}
                     target="_blank"
                     rel="noreferrer"
                     className="px-3 py-1 bg-police-800 hover:bg-police-900 text-white rounded text-xs font-semibold flex items-center gap-1"
