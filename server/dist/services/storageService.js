@@ -8,9 +8,14 @@ const fs_1 = __importDefault(require("fs"));
 const path_1 = __importDefault(require("path"));
 const crypto_1 = __importDefault(require("crypto"));
 const env_js_1 = require("../config/env.js");
-// Ensure local upload directory exists
-if (!fs_1.default.existsSync(env_js_1.ENV.STORAGE_DIR)) {
-    fs_1.default.mkdirSync(env_js_1.ENV.STORAGE_DIR, { recursive: true });
+// Ensure local upload directory exists safely
+try {
+    if (!fs_1.default.existsSync(env_js_1.ENV.STORAGE_DIR)) {
+        fs_1.default.mkdirSync(env_js_1.ENV.STORAGE_DIR, { recursive: true });
+    }
+}
+catch (err) {
+    console.warn('⚠️ Could not create STORAGE_DIR on startup (expected in serverless):', err);
 }
 class StorageService {
     /**

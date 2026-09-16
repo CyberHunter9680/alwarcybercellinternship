@@ -44,6 +44,23 @@ function errorHandler(err, req, res, next) {
             message: err.message,
         });
     }
+    // Handle Prisma Unique Constraint Violation (P2002)
+    if (err.code === 'P2002') {
+        const target = Array.isArray(err.meta?.target)
+            ? err.meta.target.join(' ')
+            : String(err.meta?.target || '');
+        let duplicateMessage = 'An application has already been registered with these details.';
+        if (target.includes('email') || (err.message && err.message.includes('email'))) {
+            duplicateMessage = 'An application has already been registered using this email address.';
+        }
+        else if (target.includes('mobile') || (err.message && err.message.includes('mobile'))) {
+            duplicateMessage = 'An application has already been registered using this mobile number.';
+        }
+        return res.status(409).json({
+            success: false,
+            message: duplicateMessage,
+        });
+    }
     // Default server error
     const statusCode = err.statusCode || 500;
     const message = err.message || 'Internal Server Error';

@@ -21,6 +21,8 @@ export const ENV = {
     ? path.join(os.tmpdir(), 'resumes')
     : (process.env.STORAGE_DIR || path.resolve(process.cwd(), 'uploads/resumes')),
   RATE_LIMIT_WINDOW_MS: parseInt(process.env.RATE_LIMIT_WINDOW_MS || '900000', 10), // 15 mins
-  RATE_LIMIT_MAX_REQUESTS: parseInt(process.env.RATE_LIMIT_MAX_REQUESTS || '200', 10),
+  RATE_LIMIT_MAX_REQUESTS: parseInt(process.env.RATE_LIMIT_MAX_REQUESTS || '2000', 10), // 2000 requests per 15 mins for shared networks
+  REGISTRATION_RATE_LIMIT_WINDOW_MS: parseInt(process.env.REGISTRATION_RATE_LIMIT_WINDOW_MS || '900000', 10), // 15 mins
+  REGISTRATION_RATE_LIMIT_MAX: parseInt(process.env.REGISTRATION_RATE_LIMIT_MAX || '1000', 10), // 1000 registrations per 15 mins (allows shared college Wi-Fi while blocking automated flood bots)
   LOGIN_RATE_LIMIT_MAX: parseInt(process.env.LOGIN_RATE_LIMIT_MAX || '5', 10),
 };

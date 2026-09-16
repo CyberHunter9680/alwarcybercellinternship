@@ -13,6 +13,7 @@ router.post('/logout', AdminController.logout);
 router.use(requireAdminAuth);
 
 router.get('/me', AdminController.getMe);
+router.patch('/change-password', AdminController.changePassword);
 router.get('/dashboard/stats', AdminController.getDashboardStats);
 router.get('/applications', AdminController.getApplications);
 router.get('/applications/:id', AdminController.getApplicationById);

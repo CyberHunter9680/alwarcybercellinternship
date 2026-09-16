@@ -78,6 +78,33 @@ class AdminController {
         return (0, responseHelper_js_1.sendSuccess)(res, { admin: req.admin });
     }
     /**
+     * Changes authenticated admin password
+     */
+    static async changePassword(req, res, next) {
+        try {
+            if (!req.admin?.id) {
+                return (0, responseHelper_js_1.sendError)(res, 'Unauthorized', 401);
+            }
+            const { currentPassword, newPassword } = adminValidator_js_1.changePasswordSchema.parse(req.body);
+            await adminService_js_1.AdminService.changePassword(req.admin.id, currentPassword, newPassword);
+            // Audit log password change
+            await auditService_js_1.AuditService.log({
+                adminId: req.admin.id,
+                action: 'PASSWORD_CHANGE',
+                details: `Admin ${req.admin.email} changed their password securely`,
+                ipAddress: req.headers['x-forwarded-for'] || req.socket.remoteAddress,
+                userAgent: req.headers['user-agent'],
+            });
+            return (0, responseHelper_js_1.sendSuccess)(res, null, 'Password updated successfully');
+        }
+        catch (error) {
+            if (error.message === 'Current password is incorrect') {
+                return (0, responseHelper_js_1.sendError)(res, error.message, 400);
+            }
+            next(error);
+        }
+    }
+    /**
      * Dashboard KPI statistics and chart analytics
      */
     static async getDashboardStats(req, res, next) {

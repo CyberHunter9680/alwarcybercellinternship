@@ -14,6 +14,11 @@ import {
   ArrowRight,
   Loader2,
   RefreshCw,
+  Lock,
+  Key,
+  Eye,
+  EyeOff,
+  X,
 } from 'lucide-react';
 import {
   ResponsiveContainer,
@@ -30,7 +35,7 @@ import {
   CartesianGrid,
   Legend,
 } from 'recharts';
-import { getAdminDashboardStats } from '../../services/api.js';
+import { getAdminDashboardStats, changeAdminPasswordApi } from '../../services/api.js';
 import { DashboardStats } from '../../types/index.js';
 import { CyberBadge } from '../../components/CyberBadge.js';
 import { useToast } from '../../context/ToastContext.js';
@@ -48,7 +53,39 @@ const COURSE_COLORS = ['#00A8E8', '#1E3E62', '#0B192C'];
 export const AdminDashboard: React.FC = () => {
   const [stats, setStats] = useState<DashboardStats | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [showPasswordModal, setShowPasswordModal] = useState(false);
+  const [currentPassword, setCurrentPassword] = useState('');
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [showPassField, setShowPassField] = useState(false);
+  const [isChangingPass, setIsChangingPass] = useState(false);
   const toast = useToast();
+
+  const handleChangePassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (newPassword.length < 8) {
+      toast.error('New password must be at least 8 characters long.');
+      return;
+    }
+    if (newPassword !== confirmPassword) {
+      toast.error('New password and confirmation do not match.');
+      return;
+    }
+
+    try {
+      setIsChangingPass(true);
+      await changeAdminPasswordApi({ currentPassword, newPassword });
+      toast.success('Admin password updated successfully!');
+      setShowPasswordModal(false);
+      setCurrentPassword('');
+      setNewPassword('');
+      setConfirmPassword('');
+    } catch (err: any) {
+      toast.error(err.message || 'Failed to update password');
+    } finally {
+      setIsChangingPass(false);
+    }
+  };
 
   const loadStats = async () => {
     try {
@@ -109,6 +146,14 @@ export const AdminDashboard: React.FC = () => {
         </div>
 
         <div className="flex items-center gap-3">
+          <button
+            onClick={() => setShowPasswordModal(true)}
+            className="p-2.5 bg-white hover:bg-slate-100 text-police-900 rounded-xl border border-slate-200 shadow-xs transition-colors flex items-center gap-1.5 text-xs font-semibold"
+            title="Change Admin Password"
+          >
+            <Key className="w-4 h-4 text-amber-600" />
+            <span className="hidden sm:inline">Change Password</span>
+          </button>
           <button
             onClick={loadStats}
             className="p-2.5 bg-white hover:bg-slate-100 text-slate-700 rounded-xl border border-slate-200 shadow-xs transition-colors flex items-center gap-1.5 text-xs font-medium"
@@ -403,6 +448,120 @@ export const AdminDashboard: React.FC = () => {
           </table>
         </div>
       </div>
+
+      {/* Change Password Modal */}
+      {showPasswordModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-xs p-4 animate-in fade-in duration-150">
+          <div className="bg-white rounded-3xl border border-slate-200 shadow-2xl max-w-md w-full p-6 sm:p-8 space-y-6 relative overflow-hidden">
+            <div className="flex items-center justify-between border-b border-slate-100 pb-4">
+              <div className="flex items-center gap-2.5">
+                <div className="w-10 h-10 rounded-xl bg-amber-50 border border-amber-200 text-amber-600 flex items-center justify-center">
+                  <Key className="w-5 h-5" />
+                </div>
+                <div>
+                  <h3 className="font-bold text-slate-900 text-base">Change Admin Password</h3>
+                  <p className="text-xs text-slate-500">Update your officer access credentials</p>
+                </div>
+              </div>
+              <button
+                onClick={() => setShowPasswordModal(false)}
+                className="p-1.5 rounded-lg hover:bg-slate-100 text-slate-400 hover:text-slate-700"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <form onSubmit={handleChangePassword} className="space-y-4" autoComplete="off">
+              {/* Current Password */}
+              <div className="space-y-1">
+                <label className="text-xs font-bold text-slate-700 uppercase tracking-wider block">
+                  Current Password
+                </label>
+                <div className="relative">
+                  <Lock className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
+                  <input
+                    type={showPassField ? 'text' : 'password'}
+                    required
+                    value={currentPassword}
+                    onChange={(e) => setCurrentPassword(e.target.value)}
+                    placeholder="Enter current password"
+                    className="w-full pl-10 pr-10 py-2.5 rounded-xl border border-slate-300 text-sm focus:ring-2 focus:ring-police-700 focus:outline-hidden"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassField(!showPassField)}
+                    className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-700"
+                  >
+                    {showPassField ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                  </button>
+                </div>
+              </div>
+
+              {/* New Password */}
+              <div className="space-y-1">
+                <label className="text-xs font-bold text-slate-700 uppercase tracking-wider block">
+                  New Password (min 8 characters)
+                </label>
+                <div className="relative">
+                  <Key className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
+                  <input
+                    type={showPassField ? 'text' : 'password'}
+                    required
+                    minLength={8}
+                    value={newPassword}
+                    onChange={(e) => setNewPassword(e.target.value)}
+                    placeholder="Enter new strong password"
+                    className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-300 text-sm focus:ring-2 focus:ring-police-700 focus:outline-hidden"
+                  />
+                </div>
+              </div>
+
+              {/* Confirm New Password */}
+              <div className="space-y-1">
+                <label className="text-xs font-bold text-slate-700 uppercase tracking-wider block">
+                  Confirm New Password
+                </label>
+                <div className="relative">
+                  <CheckCircle className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
+                  <input
+                    type={showPassField ? 'text' : 'password'}
+                    required
+                    minLength={8}
+                    value={confirmPassword}
+                    onChange={(e) => setConfirmPassword(e.target.value)}
+                    placeholder="Re-enter new password"
+                    className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-300 text-sm focus:ring-2 focus:ring-police-700 focus:outline-hidden"
+                  />
+                </div>
+              </div>
+
+              <div className="pt-3 flex gap-3">
+                <button
+                  type="button"
+                  onClick={() => setShowPasswordModal(false)}
+                  className="flex-1 py-2.5 border border-slate-300 rounded-xl text-xs font-bold text-slate-700 hover:bg-slate-50 transition-colors"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={isChangingPass}
+                  className="flex-1 py-2.5 bg-police-900 hover:bg-police-950 text-white rounded-xl text-xs font-bold shadow-md transition-all flex items-center justify-center gap-2 disabled:opacity-50"
+                >
+                  {isChangingPass ? (
+                    <>
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                      <span>Updating...</span>
+                    </>
+                  ) : (
+                    <span>Update Password</span>
+                  )}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

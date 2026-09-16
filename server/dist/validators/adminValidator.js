@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.applicationQuerySchema = exports.adminLoginSchema = void 0;
+exports.changePasswordSchema = exports.applicationQuerySchema = exports.adminLoginSchema = void 0;
 const zod_1 = require("zod");
 exports.adminLoginSchema = zod_1.z.object({
     email: zod_1.z
@@ -23,4 +23,11 @@ exports.applicationQuerySchema = zod_1.z.object({
     endDate: zod_1.z.string().optional(),
     sortBy: zod_1.z.enum(['createdAt', 'fullName', 'applicationId', 'status']).optional().default('createdAt'),
     sortOrder: zod_1.z.enum(['asc', 'desc']).optional().default('desc'),
+});
+exports.changePasswordSchema = zod_1.z.object({
+    currentPassword: zod_1.z.string({ required_error: 'Current password is required' }),
+    newPassword: zod_1.z
+        .string({ required_error: 'New password is required' })
+        .min(8, 'New password must be at least 8 characters')
+        .max(100, 'New password is too long'),
 });

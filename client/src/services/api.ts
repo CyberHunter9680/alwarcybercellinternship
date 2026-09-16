@@ -89,6 +89,11 @@ export async function getAdminProfile() {
   return response.data.data;
 }
 
+export async function changeAdminPasswordApi(payload: { currentPassword: string; newPassword: string }) {
+  const response = await api.patch('/admin/change-password', payload);
+  return response.data;
+}
+
 export async function getAdminDashboardStats(): Promise<DashboardStats> {
   const response = await api.get('/admin/dashboard/stats');
   return response.data.data;

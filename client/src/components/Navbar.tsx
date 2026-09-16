@@ -22,14 +22,10 @@ export const Navbar: React.FC = () => {
           </div>
           <div className="flex items-center gap-4 text-slate-300">
             <span className="hidden md:inline text-xs">National Cyber Helpline: <strong className="text-cyber-blue font-semibold">1930</strong></span>
-            {isAuthenticated ? (
+            {isAuthenticated && (
               <span className="text-xs bg-police-800 text-police-200 px-2 py-0.5 rounded border border-police-700">
                 Logged in: {admin?.name || 'Admin'}
               </span>
-            ) : (
-              <Link to="/admin/login" className="hover:text-cyber-blue flex items-center gap-1 transition-colors text-xs">
-                <Lock className="w-3 h-3" /> Admin Portal
-              </Link>
             )}
           </div>
         </div>

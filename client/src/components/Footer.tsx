@@ -110,11 +110,6 @@ export const Footer: React.FC = () => {
               <p className="text-[11px] leading-relaxed">
                 Registration data is securely stored and encrypted. Submission does not constitute guaranteed appointment. No government fees are charged for application.
               </p>
-              <div className="pt-1">
-                <Link to="/admin/login" className="text-police-400 hover:text-cyber-blue text-[11px] inline-flex items-center gap-1">
-                  Authorized Admin Access <ExternalLink className="w-3 h-3" />
-                </Link>
-              </div>
             </div>
           </div>
         </div>

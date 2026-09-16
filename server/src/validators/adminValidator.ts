@@ -25,3 +25,13 @@ export const applicationQuerySchema = z.object({
 });
 
 export type ApplicationQueryParams = z.infer<typeof applicationQuerySchema>;
+
+export const changePasswordSchema = z.object({
+  currentPassword: z.string({ required_error: 'Current password is required' }),
+  newPassword: z
+    .string({ required_error: 'New password is required' })
+    .min(8, 'New password must be at least 8 characters')
+    .max(100, 'New password is too long'),
+});
+
+export type ChangePasswordInput = z.infer<typeof changePasswordSchema>;

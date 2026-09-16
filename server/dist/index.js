@@ -15,6 +15,8 @@ const errorHandler_js_1 = require("./middleware/errorHandler.js");
 const rateLimiter_js_1 = require("./middleware/rateLimiter.js");
 const index_js_1 = __importDefault(require("./routes/index.js"));
 const app = (0, express_1.default)();
+// Trust reverse proxy (Vercel, Nginx, Cloudflare) to correctly identify client IP
+app.set('trust proxy', 1);
 // Security Headers
 app.use((0, helmet_1.default)({
     contentSecurityPolicy: false, // allow modern React frontend embed
@@ -51,6 +53,26 @@ app.use(express_1.default.urlencoded({ extended: true, limit: '10mb' }));
 app.use('/api', rateLimiter_js_1.generalApiLimiter);
 // Mount API routes
 app.use('/api', index_js_1.default);
+// Serve static frontend assets if built
+const path_1 = __importDefault(require("path"));
+const fs_1 = __importDefault(require("fs"));
+const possibleDistPaths = [
+    path_1.default.resolve(process.cwd(), 'dist'),
+    path_1.default.resolve(process.cwd(), '../dist'),
+    path_1.default.resolve(process.cwd(), 'client/dist'),
+];
+for (const distPath of possibleDistPaths) {
+    if (fs_1.default.existsSync(distPath) && fs_1.default.existsSync(path_1.default.join(distPath, 'index.html'))) {
+        app.use(express_1.default.static(distPath));
+        app.get('*', (req, res, next) => {
+            if (req.path.startsWith('/api')) {
+                return next();
+            }
+            res.sendFile(path_1.default.join(distPath, 'index.html'));
+        });
+        break;
+    }
+}
 // Global Error Handler
 app.use(errorHandler_js_1.errorHandler);
 // Start Server if run directly (not in Vercel serverless)

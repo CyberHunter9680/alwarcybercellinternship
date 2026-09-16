@@ -11,6 +11,7 @@ router.post('/logout', adminController_js_1.AdminController.logout);
 // Protected Admin Endpoints
 router.use(authMiddleware_js_1.requireAdminAuth);
 router.get('/me', adminController_js_1.AdminController.getMe);
+router.patch('/change-password', adminController_js_1.AdminController.changePassword);
 router.get('/dashboard/stats', adminController_js_1.AdminController.getDashboardStats);
 router.get('/applications', adminController_js_1.AdminController.getApplications);
 router.get('/applications/:id', adminController_js_1.AdminController.getApplicationById);
