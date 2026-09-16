@@ -20,6 +20,8 @@ lerna-debug.log*
 
 # Build outputs
 dist/
+client/dist/
+server/dist/
 build/
 .next/
 out/
