@@ -198,15 +198,13 @@ export class ApplicationService {
       [sortBy]: sortOrder,
     };
 
-    const [applications, total] = await Promise.all([
-      prisma.application.findMany({
-        where,
-        skip,
-        take: limit,
-        orderBy,
-      }),
-      prisma.application.count({ where }),
-    ]);
+    const applications = await prisma.application.findMany({
+      where,
+      skip,
+      take: limit,
+      orderBy,
+    });
+    const total = await prisma.application.count({ where });
 
     return {
       applications,

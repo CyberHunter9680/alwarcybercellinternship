@@ -37,32 +37,30 @@ export class AuditService {
     const skip = (page - 1) * limit;
     const where = action && action !== 'ALL' ? { action } : {};
 
-    const [logs, total] = await Promise.all([
-      prisma.auditLog.findMany({
-        where,
-        include: {
-          admin: {
-            select: {
-              id: true,
-              name: true,
-              email: true,
-              role: true,
-            },
-          },
-          application: {
-            select: {
-              id: true,
-              applicationId: true,
-              fullName: true,
-            },
+    const logs = await prisma.auditLog.findMany({
+      where,
+      include: {
+        admin: {
+          select: {
+            id: true,
+            name: true,
+            email: true,
+            role: true,
           },
         },
-        orderBy: { createdAt: 'desc' },
-        skip,
-        take: limit,
-      }),
-      prisma.auditLog.count({ where }),
-    ]);
+        application: {
+          select: {
+            id: true,
+            applicationId: true,
+            fullName: true,
+          },
+        },
+      },
+      orderBy: { createdAt: 'desc' },
+      skip,
+      take: limit,
+    });
+    const total = await prisma.auditLog.count({ where });
 
     return {
       logs,
