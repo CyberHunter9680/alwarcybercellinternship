@@ -79,6 +79,10 @@ const possibleDistPaths = [
   path.resolve(process.cwd(), 'dist'),
   path.resolve(process.cwd(), '../dist'),
   path.resolve(process.cwd(), 'client/dist'),
+  path.resolve(__dirname, '../../dist'),
+  path.resolve(__dirname, '../dist'),
+  path.resolve(__dirname, '../../client/dist'),
+  path.resolve(__dirname, '../../../dist'),
 ];
 
 for (const distPath of possibleDistPaths) {
