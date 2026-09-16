@@ -70,9 +70,11 @@ app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
 // Apply rate limiting to API routes
 app.use('/api', generalApiLimiter);
+app.use(generalApiLimiter);
 
 // Mount API routes
 app.use('/api', apiRouter);
+app.use(apiRouter);
 
 // Serve static frontend assets if built
 const possibleDistPaths = [
@@ -97,6 +99,19 @@ for (const distPath of possibleDistPaths) {
     break;
   }
 }
+
+// Fallback root handler if static files not found in serverless environment
+app.get('/', (req, res) => {
+  res.json({
+    status: 'online',
+    message: 'Alwar Police Internship Programme 2026 API Server',
+    endpoints: {
+      health: '/api/health',
+      applications: '/api/applications',
+      verify: '/api/verify/:applicationId',
+    },
+  });
+});
 
 // Global Error Handler
 app.use(errorHandler);
