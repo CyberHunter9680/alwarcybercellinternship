@@ -30,14 +30,23 @@ app.use(
 );
 
 // CORS configuration with strict origin whitelist validation
+const customAllowed = process.env.ALLOWED_ORIGINS
+  ? process.env.ALLOWED_ORIGINS.split(',').map((s) => s.trim())
+  : [];
+
 const rawAllowedOrigins = [
   ENV.FRONTEND_URL,
   ENV.PUBLIC_APP_URL,
+  ...customAllowed,
+  process.env.VERCEL_PROJECT_PRODUCTION_URL ? `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}` : '',
   'http://localhost:5173',
   'http://localhost:3000',
   'http://127.0.0.1:5173',
+  'http://127.0.0.1:3000',
 ];
-const allowedOrigins = rawAllowedOrigins.filter(Boolean).map((url) => url.replace(/\/$/, ''));
+const allowedOrigins = Array.from(
+  new Set(rawAllowedOrigins.filter(Boolean).map((url) => url.replace(/\/$/, '')))
+);
 
 app.use(
   cors({
@@ -53,7 +62,7 @@ app.use(
       if (isAllowed || ENV.NODE_ENV === 'development') {
         callback(null, true);
       } else {
-        callback(new Error(`Origin ${origin} is not allowed by CORS policy`));
+        callback(null, false);
       }
     },
     credentials: true,

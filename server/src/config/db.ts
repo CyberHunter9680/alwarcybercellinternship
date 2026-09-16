@@ -12,9 +12,7 @@ export const prisma =
     log: ENV.NODE_ENV === 'development' ? ['query', 'error', 'warn'] : ['error'],
   });
 
-if (ENV.NODE_ENV !== 'production') {
-  globalThis.prisma = prisma;
-}
+globalThis.prisma = prisma;
 
 export async function connectDB() {
   try {
