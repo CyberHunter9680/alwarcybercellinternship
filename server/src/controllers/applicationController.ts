@@ -297,7 +297,6 @@ export class ApplicationController {
     }
   }
 
-
   /**
    * Serves/streams resume file securely (Strictly Admin Protected)
    */
@@ -350,5 +349,3 @@ export class ApplicationController {
     }
   }
 }
-
-

@@ -49,4 +49,3 @@ export const registrationLimiter = rateLimit({
     message: 'Too many registration requests received from this network. Please try again after a few minutes.',
   },
 });
-

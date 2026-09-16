@@ -3,6 +3,8 @@ import cors from 'cors';
 import helmet from 'helmet';
 import morgan from 'morgan';
 import cookieParser from 'cookie-parser';
+import path from 'path';
+import fs from 'fs';
 import { ENV } from './config/env.js';
 import { connectDB } from './config/db.js';
 import { AdminService } from './services/adminService.js';
@@ -60,7 +62,6 @@ app.use(
   })
 );
 
-
 // Middlewares
 app.use(morgan(ENV.NODE_ENV === 'development' ? 'dev' : 'combined'));
 app.use(cookieParser());
@@ -74,9 +75,6 @@ app.use('/api', generalApiLimiter);
 app.use('/api', apiRouter);
 
 // Serve static frontend assets if built
-import path from 'path';
-import fs from 'fs';
-
 const possibleDistPaths = [
   path.resolve(process.cwd(), 'dist'),
   path.resolve(process.cwd(), '../dist'),
@@ -120,7 +118,12 @@ async function startServer() {
   });
 }
 
-if (!process.env.VERCEL && process.env.NODE_ENV !== 'test') {
+const isMainModule = process.argv[1] && (
+  process.argv[1].endsWith('index.ts') ||
+  process.argv[1].endsWith('index.js')
+);
+
+if (!process.env.VERCEL && isMainModule) {
   startServer();
 } else if (process.env.VERCEL) {
   // Connect DB on serverless initialization
