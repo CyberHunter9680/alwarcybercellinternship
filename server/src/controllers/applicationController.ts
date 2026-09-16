@@ -1,11 +1,73 @@
 import { Request, Response, NextFunction } from 'express';
+import jwt from 'jsonwebtoken';
+import path from 'path';
 import { createApplicationSchema } from '../validators/applicationValidator.js';
 import { ApplicationService } from '../services/applicationService.js';
 import { StorageService } from '../services/storageService.js';
 import { PDFService } from '../services/pdfService.js';
+import { AdminService } from '../services/adminService.js';
 import { sendSuccess, sendError } from '../utils/responseHelper.js';
+import { ENV } from '../config/env.js';
+
+interface SlipTokenPayload {
+  applicationId: string;
+  id: string;
+  type: string;
+}
 
 export class ApplicationController {
+  /**
+   * Generates a signed, tamper-proof token allowing the student to access their own slip
+   */
+  private static generateSlipToken(applicationId: string, id: string): string {
+    const payload: SlipTokenPayload = {
+      applicationId,
+      id,
+      type: 'slip_access',
+    };
+    return jwt.sign(payload, ENV.AUTH_SECRET, { expiresIn: '7d' });
+  }
+
+  /**
+   * Helper to verify if the request is authorized either as an Admin or with a valid candidate Slip Token
+   */
+  private static verifyAccess(req: Request, targetApplicationIdOrId: string): boolean {
+    // 1. Check if caller is an authenticated Admin (via cookie or Bearer header)
+    let adminToken = req.cookies?.admin_token;
+    if (!adminToken && req.headers.authorization) {
+      const parts = req.headers.authorization.split(' ');
+      if (parts.length === 2 && parts[0] === 'Bearer') {
+        adminToken = parts[1];
+      }
+    }
+
+    if (adminToken) {
+      const adminPayload = AdminService.verifyToken(adminToken);
+      if (adminPayload) {
+        return true; // Admin has authorized access
+      }
+    }
+
+    // 2. Check candidate slip token from query param or header
+    const token = (req.query.token as string) || (req.headers['x-slip-token'] as string);
+    if (token) {
+      try {
+        const decoded = jwt.verify(token, ENV.AUTH_SECRET) as SlipTokenPayload;
+        if (
+          decoded &&
+          decoded.type === 'slip_access' &&
+          (decoded.applicationId === targetApplicationIdOrId || decoded.id === targetApplicationIdOrId)
+        ) {
+          return true; // Candidate is authorized for their specific application
+        }
+      } catch {
+        // Token invalid or expired
+      }
+    }
+
+    return false;
+  }
+
   /**
    * Submits a student registration application
    */
@@ -66,6 +128,12 @@ export class ApplicationController {
         ip
       );
 
+      // Generate secure slip access token
+      const slipToken = ApplicationController.generateSlipToken(
+        application.applicationId,
+        application.id
+      );
+
       return sendSuccess(
         res,
         {
@@ -76,8 +144,14 @@ export class ApplicationController {
           mobile: application.mobile,
           course: application.course.replace('_', '.'),
           year: application.year.replace('_', ' ').replace('YEAR', 'Year'),
+          universityName: application.universityName,
+          skills: application.skills,
+          customSkills: application.customSkills,
+          motivation: application.motivation,
+          resumeFilename: application.resumeFilename,
           status: application.status,
           createdAt: application.createdAt,
+          slipToken,
         },
         'Application submitted successfully! Please download your registration slip.',
         201
@@ -88,15 +162,46 @@ export class ApplicationController {
   }
 
   /**
-   * Generates and downloads the A4 Registration Slip PDF
+   * Generates and downloads the A4 Registration Slip PDF (Protected by Admin Auth or Candidate Slip Token)
    */
   static async downloadRegistrationSlip(req: Request, res: Response, next: NextFunction) {
     try {
       const idOrAppId = req.params.idOrAppId as string;
-      const application = await ApplicationService.getByIdOrAppId(idOrAppId);
+      if (!idOrAppId || idOrAppId.trim() === '') {
+        return sendError(res, 'Application identifier is required', 400);
+      }
+
+      const trimmedId = idOrAppId.trim();
+
+      // 1. Upfront Server-Side Authorization Check: Check Admin session or token matching requested identifier
+      const hasInitialAccess = ApplicationController.verifyAccess(req, trimmedId);
+
+      if (!hasInitialAccess) {
+        return sendError(
+          res,
+          'Access denied. Valid registration session token or administrator credentials required to download registration slip.',
+          403
+        );
+      }
+
+      // 2. Fetch record from database
+      const application = await ApplicationService.getByIdOrAppId(trimmedId);
 
       if (!application) {
-        return sendError(res, 'Application not found', 404);
+        return sendError(res, 'Application record not found.', 404);
+      }
+
+      // 3. Re-verify access against resolved database record identifiers
+      const isAuthorized =
+        ApplicationController.verifyAccess(req, application.applicationId) ||
+        ApplicationController.verifyAccess(req, application.id);
+
+      if (!isAuthorized) {
+        return sendError(
+          res,
+          'Access denied. Token does not match requested application record.',
+          403
+        );
       }
 
       const pdfBuffer = await PDFService.generateRegistrationSlip({
@@ -129,15 +234,46 @@ export class ApplicationController {
   }
 
   /**
-   * Retrieves application details
+   * Retrieves full application details (Protected by Admin Auth or Candidate Slip Token)
    */
   static async getApplicationDetails(req: Request, res: Response, next: NextFunction) {
     try {
       const idOrAppId = req.params.idOrAppId as string;
-      const application = await ApplicationService.getByIdOrAppId(idOrAppId);
+      if (!idOrAppId || idOrAppId.trim() === '') {
+        return sendError(res, 'Application identifier is required', 400);
+      }
+
+      const trimmedId = idOrAppId.trim();
+
+      // 1. Upfront Server-Side Authorization Check
+      const hasInitialAccess = ApplicationController.verifyAccess(req, trimmedId);
+
+      if (!hasInitialAccess) {
+        return sendError(
+          res,
+          'Access denied. Candidate personal information is protected. Administrator credentials or valid registration session required.',
+          403
+        );
+      }
+
+      // 2. Fetch record from database
+      const application = await ApplicationService.getByIdOrAppId(trimmedId);
 
       if (!application) {
-        return sendError(res, 'Application not found', 404);
+        return sendError(res, 'Application record not found.', 404);
+      }
+
+      // 3. Re-verify access against resolved database record identifiers
+      const isAuthorized =
+        ApplicationController.verifyAccess(req, application.applicationId) ||
+        ApplicationController.verifyAccess(req, application.id);
+
+      if (!isAuthorized) {
+        return sendError(
+          res,
+          'Access denied. Token does not match requested application record.',
+          403
+        );
       }
 
       return sendSuccess(res, {
@@ -161,23 +297,58 @@ export class ApplicationController {
     }
   }
 
+
   /**
-   * Serves/streams resume file securely
+   * Serves/streams resume file securely (Strictly Admin Protected)
    */
   static async getResume(req: Request, res: Response, next: NextFunction) {
     try {
-      const filename = req.params.filename as string;
-      const fileData = await StorageService.getResumeBuffer(filename);
+      const rawParam = req.params.filename as string;
+      if (!rawParam || rawParam.trim() === '') {
+        return sendError(res, 'Resume identifier is required', 400);
+      }
 
+      // Path traversal defense
+      const sanitizedParam = path.basename(rawParam.trim());
+
+      // 1. Attempt to find application by ID, Application ID, or filename
+      let application = await ApplicationService.getByIdOrAppId(sanitizedParam);
+      if (!application) {
+        application = await ApplicationService.getByResumeUrl(sanitizedParam);
+      }
+
+      let fileData: { buffer: Buffer; mimeType: string } | null = null;
+      let displayFilename = sanitizedParam;
+
+      if (application) {
+        displayFilename = application.resumeFilename || `${application.applicationId}_Resume.pdf`;
+        fileData = await StorageService.getResumeBuffer(
+          application.resumeUrl,
+          application.resumeFilename
+        );
+      }
+
+      // 2. Fallback filesystem lookup if not resolved via application record
       if (!fileData) {
-        return sendError(res, 'Resume file not found', 404);
+        fileData = await StorageService.getResumeBuffer(sanitizedParam);
+      }
+
+      // 3. If file cannot be found, return a generic safe 404 without leaking candidate PII
+      if (!fileData) {
+        return res.status(404).json({
+          success: false,
+          message: 'Resume document is unavailable for this registration record.',
+        });
       }
 
       res.setHeader('Content-Type', fileData.mimeType);
-      res.setHeader('Content-Disposition', `inline; filename="${filename}"`);
+      res.setHeader('Content-Disposition', `inline; filename="${encodeURIComponent(displayFilename)}"`);
+      res.setHeader('Content-Length', fileData.buffer.length);
       return res.end(fileData.buffer);
     } catch (error) {
       next(error);
     }
   }
 }
+
+

@@ -83,6 +83,30 @@ export class AdminService {
   }
 
   /**
+   * Updates admin password after verifying current password
+   */
+  static async changePassword(adminId: string, currentPassword: string, newPassword: string): Promise<void> {
+    const admin = await prisma.admin.findUnique({
+      where: { id: adminId },
+    });
+
+    if (!admin || !admin.isActive) {
+      throw new Error('Admin account not found');
+    }
+
+    const isMatch = await this.comparePassword(currentPassword, admin.passwordHash);
+    if (!isMatch) {
+      throw new Error('Current password is incorrect');
+    }
+
+    const newHash = await this.hashPassword(newPassword);
+    await prisma.admin.update({
+      where: { id: adminId },
+      data: { passwordHash: newHash },
+    });
+  }
+
+  /**
    * Seeds default admin if not existing
    */
   static async seedDefaultAdmin(): Promise<void> {

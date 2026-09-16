@@ -41,6 +41,12 @@ export async function submitStudentApplication(formData: FormData): Promise<{
   year: string;
   status: string;
   createdAt: string;
+  slipToken?: string;
+  universityName?: string;
+  skills?: string[];
+  customSkills?: string[];
+  motivation?: string;
+  resumeFilename?: string;
 }> {
   const response = await api.post('/applications', formData, {
     headers: {
@@ -50,18 +56,30 @@ export async function submitStudentApplication(formData: FormData): Promise<{
   return response.data.data;
 }
 
-export async function getApplicationDetails(idOrAppId: string): Promise<Application> {
-  const response = await api.get(`/applications/${idOrAppId}`);
+export async function getApplicationDetails(
+  idOrAppId: string,
+  slipToken?: string
+): Promise<Application> {
+  const response = await api.get(`/applications/${idOrAppId}`, {
+    params: slipToken ? { token: slipToken } : {},
+    headers: slipToken ? { 'x-slip-token': slipToken } : {},
+  });
   return response.data.data;
 }
 
-export async function downloadRegistrationSlipPDF(idOrAppId: string): Promise<Blob> {
+export async function downloadRegistrationSlipPDF(
+  idOrAppId: string,
+  slipToken?: string
+): Promise<Blob> {
   const response = await axios.get(`/api/applications/${idOrAppId}/registration-slip`, {
+    params: slipToken ? { token: slipToken } : {},
+    headers: slipToken ? { 'x-slip-token': slipToken } : {},
     responseType: 'blob',
     withCredentials: true,
   });
   return response.data;
 }
+
 
 export async function verifyApplicationPublic(
   applicationId: string
@@ -87,6 +105,11 @@ export async function adminLogout() {
 export async function getAdminProfile() {
   const response = await api.get('/admin/me');
   return response.data.data;
+}
+
+export async function changeAdminPasswordApi(payload: { currentPassword: string; newPassword: string }) {
+  const response = await api.patch('/admin/change-password', payload);
+  return response.data;
 }
 
 export async function getAdminDashboardStats(): Promise<DashboardStats> {

@@ -314,6 +314,13 @@ export const Register: React.FC = () => {
       // Clear draft
       sessionStorage.removeItem('alwar_internship_draft');
 
+      // Save slip token for the session so page reloads can securely access slip
+      if (result.slipToken) {
+        sessionStorage.setItem(`alwar_slip_token_${result.applicationId}`, result.slipToken);
+        sessionStorage.setItem('alwar_last_slip_token', result.slipToken);
+        sessionStorage.setItem('alwar_last_app_id', result.applicationId);
+      }
+
       toast.success('Application submitted successfully!');
 
       // Redirect to Registration Success page with state
@@ -326,6 +333,12 @@ export const Register: React.FC = () => {
           submissionDate: result.createdAt,
           email: result.email,
           mobile: result.mobile,
+          slipToken: result.slipToken,
+          universityName: result.universityName,
+          skills: result.skills,
+          customSkills: result.customSkills,
+          motivation: result.motivation,
+          resumeFilename: result.resumeFilename,
         },
       });
     } catch (err: any) {

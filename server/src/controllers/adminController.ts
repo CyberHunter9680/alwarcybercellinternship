@@ -1,5 +1,5 @@
 import { Response, NextFunction } from 'express';
-import { adminLoginSchema, applicationQuerySchema } from '../validators/adminValidator.js';
+import { adminLoginSchema, applicationQuerySchema, changePasswordSchema } from '../validators/adminValidator.js';
 import { updateStatusSchema } from '../validators/applicationValidator.js';
 import { AdminService } from '../services/adminService.js';
 import { ApplicationService } from '../services/applicationService.js';
@@ -86,6 +86,36 @@ export class AdminController {
    */
   static async getMe(req: AuthenticatedRequest, res: Response) {
     return sendSuccess(res, { admin: req.admin });
+  }
+
+  /**
+   * Changes authenticated admin password
+   */
+  static async changePassword(req: AuthenticatedRequest, res: Response, next: NextFunction) {
+    try {
+      if (!req.admin?.id) {
+        return sendError(res, 'Unauthorized', 401);
+      }
+
+      const { currentPassword, newPassword } = changePasswordSchema.parse(req.body);
+      await AdminService.changePassword(req.admin.id, currentPassword, newPassword);
+
+      // Audit log password change
+      await AuditService.log({
+        adminId: req.admin.id,
+        action: 'PASSWORD_CHANGE',
+        details: `Admin ${req.admin.email} changed their password securely`,
+        ipAddress: (req.headers['x-forwarded-for'] as string) || req.socket.remoteAddress,
+        userAgent: req.headers['user-agent'],
+      });
+
+      return sendSuccess(res, null, 'Password updated successfully');
+    } catch (error: any) {
+      if (error.message === 'Current password is incorrect') {
+        return sendError(res, error.message, 400);
+      }
+      next(error);
+    }
   }
 
   /**

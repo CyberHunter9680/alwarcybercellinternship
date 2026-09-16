@@ -32,11 +32,24 @@ export const RegistrationSuccess: React.FC = () => {
     submissionDate?: string;
     email?: string;
     mobile?: string;
+    slipToken?: string;
+    universityName?: string;
+    skills?: string[];
+    customSkills?: string[];
+    motivation?: string;
+    resumeFilename?: string;
   } | null;
 
   const [application, setApplication] = useState<Application | null>(null);
   const [showSlipModal, setShowSlipModal] = useState(false);
   const [isDownloading, setIsDownloading] = useState(false);
+
+  // Retrieve token from navigation state or session storage
+  const appId = state?.applicationId || sessionStorage.getItem('alwar_last_app_id');
+  const token =
+    state?.slipToken ||
+    (appId ? sessionStorage.getItem(`alwar_slip_token_${appId}`) : null) ||
+    sessionStorage.getItem('alwar_last_slip_token');
 
   useEffect(() => {
     // Trigger celebratory confetti effect
@@ -51,28 +64,26 @@ export const RegistrationSuccess: React.FC = () => {
       // ignore
     }
 
-    // If application details passed or id present, load full object
-    const appId = state?.applicationId;
-    if (appId) {
-      getApplicationDetails(appId)
+    if (appId && token) {
+      getApplicationDetails(appId, token)
         .then((data) => setApplication(data))
         .catch(() => {
-          // fallback to location state
+          // fallback to state
         });
     }
-  }, [state]);
+  }, [appId, token]);
 
   const handleDownloadSlip = async () => {
-    const appId = state?.applicationId || application?.applicationId;
-    if (!appId) return;
+    const targetAppId = state?.applicationId || application?.applicationId || appId;
+    if (!targetAppId) return;
 
     try {
       setIsDownloading(true);
-      const blob = await downloadRegistrationSlipPDF(appId);
+      const blob = await downloadRegistrationSlipPDF(targetAppId, token || undefined);
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
-      a.download = `Alwar_Police_Cyber_Internship_${appId}.pdf`;
+      a.download = `Alwar_Police_Cyber_Internship_${targetAppId}.pdf`;
       document.body.appendChild(a);
       a.click();
       window.URL.revokeObjectURL(url);
@@ -86,13 +97,34 @@ export const RegistrationSuccess: React.FC = () => {
   };
 
   const handlePrintSlip = () => {
+    if (!application && state && appId) {
+      // Construct application object from state if full object not yet loaded
+      setApplication({
+        id: appId,
+        applicationId: appId,
+        fullName: state.applicantName || 'Registered Applicant',
+        mobile: state.mobile || '',
+        email: state.email || '',
+        course: state.course || 'BCA',
+        year: state.year || '2nd Year',
+        universityName: state.universityName || 'Registered University',
+        skills: state.skills || [],
+        customSkills: state.customSkills || [],
+        motivation: state.motivation || '',
+        resumeFilename: state.resumeFilename || 'resume.pdf',
+        status: 'SUBMITTED',
+        createdAt: state.submissionDate || new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      } as Application);
+    }
     setShowSlipModal(true);
     setTimeout(() => {
       window.print();
     }, 500);
   };
 
-  const appId = state?.applicationId || application?.applicationId || 'APCSIP2026-000001';
+
+  const displayAppId = state?.applicationId || application?.applicationId || appId || 'APCSIP2026-000001';
   const applicantName = state?.applicantName || application?.fullName || 'Registered Applicant';
   const course = state?.course || application?.course || 'MCA';
   const year = state?.year || application?.year || '3rd Year';
@@ -136,7 +168,7 @@ export const RegistrationSuccess: React.FC = () => {
             Your Official Application ID
           </span>
           <div className="text-2xl sm:text-3xl font-mono font-black text-cyber-blue tracking-wider">
-            {appId}
+            {displayAppId}
           </div>
           <p className="text-[11px] text-slate-400">
             Please quote this Application ID in all future correspondence with the Cyber Cell.

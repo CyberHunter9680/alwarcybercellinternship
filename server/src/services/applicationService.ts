@@ -64,7 +64,7 @@ export class ApplicationService {
         customSkills: input.customSkills || [],
         motivation: input.motivation.trim(),
         resumeFilename: fileInfo.originalFilename,
-        resumeUrl: fileInfo.savedFilename,
+        resumeUrl: fileInfo.url || fileInfo.savedFilename,
         resumeMimeType: fileInfo.mimeType,
         resumeSize: fileInfo.size,
         status: ApplicationStatus.SUBMITTED,
@@ -79,9 +79,25 @@ export class ApplicationService {
    * Retrieves application by ID or Application ID
    */
   static async getByIdOrAppId(idOrAppId: string) {
+    if (!idOrAppId) return null;
     return prisma.application.findFirst({
       where: {
         OR: [{ id: idOrAppId }, { applicationId: idOrAppId }],
+      },
+    });
+  }
+
+  /**
+   * Retrieves application by resume filename or URL reference
+   */
+  static async getByResumeUrl(filenameOrUrl: string) {
+    if (!filenameOrUrl) return null;
+    return prisma.application.findFirst({
+      where: {
+        OR: [
+          { resumeUrl: filenameOrUrl },
+          { resumeFilename: filenameOrUrl },
+        ],
       },
     });
   }

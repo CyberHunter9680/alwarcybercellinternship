@@ -18,35 +18,48 @@ app.set('trust proxy', 1);
 // Security Headers
 app.use(
   helmet({
-    contentSecurityPolicy: false, // allow modern React frontend embed
+    contentSecurityPolicy: false, // allow modern React frontend dynamic resources
     crossOriginEmbedderPolicy: false,
+    xContentTypeOptions: true,
+    xFrameOptions: { action: 'sameorigin' },
+    referrerPolicy: { policy: 'strict-origin-when-cross-origin' },
+    dnsPrefetchControl: { allow: false },
   })
 );
 
-// CORS configuration
-const allowedOrigins = [
+// CORS configuration with strict origin whitelist validation
+const rawAllowedOrigins = [
   ENV.FRONTEND_URL,
   ENV.PUBLIC_APP_URL,
   'http://localhost:5173',
   'http://localhost:3000',
   'http://127.0.0.1:5173',
 ];
+const allowedOrigins = rawAllowedOrigins.filter(Boolean).map((url) => url.replace(/\/$/, ''));
 
 app.use(
   cors({
     origin: (origin, callback) => {
       // Allow requests with no origin (like mobile apps, curl, server-to-server)
-      if (!origin || allowedOrigins.includes(origin)) {
+      if (!origin) {
+        return callback(null, true);
+      }
+
+      const cleanOrigin = origin.replace(/\/$/, '');
+      const isAllowed = allowedOrigins.includes(cleanOrigin);
+
+      if (isAllowed || ENV.NODE_ENV === 'development') {
         callback(null, true);
       } else {
-        callback(null, true); // Permissive in dev/staging to prevent CORS issues
+        callback(new Error(`Origin ${origin} is not allowed by CORS policy`));
       }
     },
     credentials: true,
     methods: ['GET', 'POST', 'PATCH', 'PUT', 'DELETE', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'x-slip-token'],
   })
 );
+
 
 // Middlewares
 app.use(morgan(ENV.NODE_ENV === 'development' ? 'dev' : 'combined'));
@@ -107,11 +120,12 @@ async function startServer() {
   });
 }
 
-if (!process.env.VERCEL) {
+if (!process.env.VERCEL && process.env.NODE_ENV !== 'test') {
   startServer();
-} else {
+} else if (process.env.VERCEL) {
   // Connect DB on serverless initialization
   connectDB().catch(console.error);
 }
 
 export default app;
+

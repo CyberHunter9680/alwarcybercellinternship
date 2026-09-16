@@ -2,6 +2,7 @@ import { Router } from 'express';
 import { ApplicationController } from '../controllers/applicationController.js';
 import { uploadResumeMiddleware } from '../middleware/uploadMiddleware.js';
 import { registrationLimiter } from '../middleware/rateLimiter.js';
+import { requireAdminAuth } from '../middleware/authMiddleware.js';
 
 const router = Router();
 
@@ -13,13 +14,14 @@ router.post(
   ApplicationController.submitApplication
 );
 
-// Download PDF Registration Slip
+// Download PDF Registration Slip (Authorized for Admin or Candidate with signed slip token)
 router.get('/:idOrAppId/registration-slip', ApplicationController.downloadRegistrationSlip);
 
-// Application details
+// Application details (Authorized for Admin or Candidate with signed slip token)
 router.get('/:idOrAppId', ApplicationController.getApplicationDetails);
 
-// Stream/view uploaded resume
-router.get('/resume/:filename', ApplicationController.getResume);
+// Stream/view uploaded resume (Strictly Protected: Admin Authentication Required)
+router.get('/resume/:filename', requireAdminAuth, ApplicationController.getResume);
 
 export default router;
+

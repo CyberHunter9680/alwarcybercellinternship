@@ -3,23 +3,36 @@ import { Application } from '@prisma/client';
 
 export class ExportService {
   /**
-   * Formats applications into clean tabular rows for export
+   * Sanitizes text strings to prevent Formula Injection (CSV / Excel Injection)
+   * If a cell begins with '=', '+', '-', '@', '\t', '\r', it prefixes with a single quote "'"
+   */
+  private static sanitizeFormula(val: unknown): string {
+    if (val === null || val === undefined) return '';
+    const str = String(val);
+    if (/^[=+\-@\t\r]/.test(str)) {
+      return `'${str}`;
+    }
+    return str;
+  }
+
+  /**
+   * Formats applications into clean tabular rows for export with formula sanitization
    */
   private static formatApplications(applications: Application[]) {
     return applications.map((app) => ({
-      'Application ID': app.applicationId,
-      'Full Name': app.fullName,
-      'Mobile Number': app.mobile,
-      'Email Address': app.email,
-      'Course': app.course.replace('_', '.'),
-      'Academic Year': app.year.replace('_', ' ').replace('YEAR', 'Year'),
-      'University / College': app.universityName,
-      'Predefined Skills': app.skills.join(', '),
-      'Custom Skills': app.customSkills.join(', '),
-      'Statement of Motivation': app.motivation,
-      'Resume Filename': app.resumeFilename,
-      'Current Status': app.status.replace('_', ' '),
-      'Status Remarks': app.statusRemarks || '',
+      'Application ID': this.sanitizeFormula(app.applicationId),
+      'Full Name': this.sanitizeFormula(app.fullName),
+      'Mobile Number': this.sanitizeFormula(app.mobile),
+      'Email Address': this.sanitizeFormula(app.email),
+      'Course': this.sanitizeFormula(app.course.replace('_', '.')),
+      'Academic Year': this.sanitizeFormula(app.year.replace('_', ' ').replace('YEAR', 'Year')),
+      'University / College': this.sanitizeFormula(app.universityName),
+      'Predefined Skills': this.sanitizeFormula(app.skills.join(', ')),
+      'Custom Skills': this.sanitizeFormula(app.customSkills.join(', ')),
+      'Statement of Motivation': this.sanitizeFormula(app.motivation),
+      'Resume Filename': this.sanitizeFormula(app.resumeFilename),
+      'Current Status': this.sanitizeFormula(app.status.replace('_', ' ')),
+      'Status Remarks': this.sanitizeFormula(app.statusRemarks || ''),
       'Registration Date': new Date(app.createdAt).toISOString(),
     }));
   }
@@ -67,3 +80,4 @@ export class ExportService {
     return xlsxBuffer as Buffer;
   }
 }
+

@@ -120,7 +120,7 @@ NODE_ENV=development
 DATABASE_URL="postgresql://username:password@ep-example-pooler.region.aws.neon.tech/alwar_internship?sslmode=require"
 AUTH_SECRET="your-super-secure-jwt-secret-key-32-chars-min"
 ADMIN_EMAIL="admin@alwarpolice.gov.in"
-ADMIN_PASSWORD="Admin@AlwarCyber2026!"
+ADMIN_PASSWORD="your-strong-production-admin-password"
 FRONTEND_URL="http://localhost:5173"
 PUBLIC_APP_URL="http://localhost:5173"
 STORAGE_PROVIDER="LOCAL"
@@ -152,15 +152,10 @@ Visit:
 
 ---
 
-## 🔐 Default Admin Credentials
-
-| Field | Value |
-| :--- | :--- |
-| **Admin Portal URL** | `http://localhost:5173/admin/login` |
-| **Email** | `admin@alwarpolice.gov.in` |
-| **Default Password** | `Admin@AlwarCyber2026!` |
-
-*(Can be configured in `.env` before running `npm run prisma:seed`)*
+## 🔐 Admin Authentication & Security
+- Admin access is strictly secured with Bcrypt password hashing (12 rounds) and JWT authentication.
+- Admin credentials must be configured securely via environment variables (`ADMIN_EMAIL`, `ADMIN_PASSWORD`, `AUTH_SECRET`) in your deployment environment.
+- Never commit production passwords or secrets into version control.
 
 ---
 
