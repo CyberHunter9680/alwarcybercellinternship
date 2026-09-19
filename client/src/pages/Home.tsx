@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import {
   Shield,
@@ -18,9 +18,27 @@ import {
   Eye,
   Server,
   Network,
+  AlertTriangle,
 } from 'lucide-react';
+import { getPublicRegistrationStatus } from '../services/api.js';
 
 export const Home: React.FC = () => {
+  // Registration status state
+  const [isRegistrationOpen, setIsRegistrationOpen] = useState<boolean>(true);
+  const [statusMessage, setStatusMessage] = useState<string>('');
+
+  useEffect(() => {
+    getPublicRegistrationStatus()
+      .then((res) => {
+        setIsRegistrationOpen(res.isOpen);
+        if (res.message) setStatusMessage(res.message);
+      })
+      .catch(() => {
+        // Default to open if check fails gracefully
+        setIsRegistrationOpen(true);
+      });
+  }, []);
+
   // Quick eligibility checker state
   const [testCourse, setTestCourse] = useState('');
   const [testYear, setTestYear] = useState('');
@@ -89,7 +107,11 @@ export const Home: React.FC = () => {
               <div className="inline-flex items-center gap-2.5 px-4 py-1.5 rounded-full bg-police-800/80 border border-police-600/50 text-xs font-semibold tracking-wide text-police-200 shadow-inner backdrop-blur-md">
                 <Shield className="w-4 h-4 text-cyber-blue" />
                 <span>OFFICIAL REGISTRATION PORTAL 2026</span>
-                <span className="w-1.5 h-1.5 rounded-full bg-cyber-blue animate-ping"></span>
+                {isRegistrationOpen ? (
+                  <span className="w-1.5 h-1.5 rounded-full bg-cyber-blue animate-ping"></span>
+                ) : (
+                  <span className="px-1.5 py-0.2 bg-rose-600 text-[10px] text-white rounded font-bold">CLOSED</span>
+                )}
               </div>
             </div>
 
@@ -106,6 +128,33 @@ export const Home: React.FC = () => {
               </p>
             </div>
 
+            {/* Registration Closed Notice Banner */}
+            {!isRegistrationOpen && (
+              <div className="max-w-3xl mx-auto p-5 sm:p-6 rounded-2xl bg-amber-500/10 border-2 border-amber-500/40 backdrop-blur-md text-left shadow-xl space-y-3 animate-in fade-in slide-in-from-top-4 duration-300">
+                <div className="flex items-start gap-3.5">
+                  <div className="p-2 rounded-xl bg-amber-500/20 text-amber-300 shrink-0 mt-0.5">
+                    <AlertTriangle className="w-6 h-6" />
+                  </div>
+                  <div className="space-y-1.5">
+                    <h3 className="text-base sm:text-lg font-bold text-amber-200 flex items-center gap-2">
+                      <span>Registration Closed</span>
+                      <span className="text-xs px-2 py-0.5 bg-amber-500/30 text-amber-100 rounded-full font-mono">
+                        Official Notice
+                      </span>
+                    </h3>
+                    <p className="text-sm sm:text-base text-amber-100/90 leading-relaxed font-normal whitespace-pre-line">
+                      {statusMessage ||
+                        `Registration for the Alwar Police Internship Programme 2026 is currently closed.
+
+Thank you for your interest in the programme. The registration window has now been closed, and new applications are no longer being accepted.
+
+For further information or official updates, please refer to the official programme communication channels.`}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            )}
+
             {/* Description */}
             <p className="text-base sm:text-lg text-slate-300 max-w-2xl mx-auto leading-relaxed font-normal">
               A professional cyber security internship programme designed to provide students with practical exposure, learning opportunities and experience in cyber security.
@@ -113,13 +162,20 @@ export const Home: React.FC = () => {
 
             {/* Primary & Secondary Call to Actions */}
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-4">
-              <Link
-                to="/register"
-                className="w-full sm:w-auto px-8 py-4 bg-gradient-to-r from-police-600 to-cyber-blue hover:from-police-500 hover:to-cyan-400 text-white font-bold rounded-xl shadow-lg shadow-cyan-900/30 hover:shadow-cyan-500/30 transition-all flex items-center justify-center gap-3 text-base group"
-              >
-                <span>Register Now</span>
-                <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
-              </Link>
+              {isRegistrationOpen ? (
+                <Link
+                  to="/register"
+                  className="w-full sm:w-auto px-8 py-4 bg-gradient-to-r from-police-600 to-cyber-blue hover:from-police-500 hover:to-cyan-400 text-white font-bold rounded-xl shadow-lg shadow-cyan-900/30 hover:shadow-cyan-500/30 transition-all flex items-center justify-center gap-3 text-base group"
+                >
+                  <span>Register Now</span>
+                  <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+                </Link>
+              ) : (
+                <div className="w-full sm:w-auto px-8 py-4 bg-slate-800/80 text-slate-400 font-bold rounded-xl border border-slate-700/80 flex items-center justify-center gap-3 text-base cursor-not-allowed">
+                  <Lock className="w-5 h-5 text-amber-400" />
+                  <span>Registration Closed</span>
+                </div>
+              )}
               <a
                 href="#helpdesk"
                 className="w-full sm:w-auto px-8 py-4 bg-police-800/80 hover:bg-police-700 text-slate-100 font-semibold rounded-xl border border-police-600/60 transition-all flex items-center justify-center gap-2 text-base backdrop-blur-md"

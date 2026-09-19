@@ -18,7 +18,10 @@ router.get('/dashboard/stats', AdminController.getDashboardStats);
 router.get('/applications', AdminController.getApplications);
 router.get('/applications/:id', AdminController.getApplicationById);
 router.patch('/applications/:id/status', AdminController.updateApplicationStatus);
+router.delete('/applications/:id', AdminController.deleteApplication);
 router.get('/export', AdminController.exportApplications);
 router.get('/audit-logs', AdminController.getAuditLogs);
+router.get('/system/registration-status', AdminController.getRegistrationStatus);
+router.post('/system/registration-status', AdminController.setRegistrationStatus);
 
 export default router;

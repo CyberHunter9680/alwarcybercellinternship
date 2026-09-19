@@ -19,6 +19,9 @@ import {
   Eye,
   EyeOff,
   X,
+  PauseCircle,
+  PlayCircle,
+  AlertTriangle,
 } from 'lucide-react';
 import {
   ResponsiveContainer,
@@ -35,7 +38,12 @@ import {
   CartesianGrid,
   Legend,
 } from 'recharts';
-import { getAdminDashboardStats, changeAdminPasswordApi } from '../../services/api.js';
+import {
+  getAdminDashboardStats,
+  changeAdminPasswordApi,
+  getAdminRegistrationStatus,
+  setAdminRegistrationStatus,
+} from '../../services/api.js';
 import { DashboardStats } from '../../types/index.js';
 import { CyberBadge } from '../../components/CyberBadge.js';
 import { useToast } from '../../context/ToastContext.js';
@@ -59,6 +67,13 @@ export const AdminDashboard: React.FC = () => {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [showPassField, setShowPassField] = useState(false);
   const [isChangingPass, setIsChangingPass] = useState(false);
+
+  // Registration Control State
+  const [isRegistrationOpen, setIsRegistrationOpen] = useState(true);
+  const [showRegStatusModal, setShowRegStatusModal] = useState(false);
+  const [isUpdatingRegStatus, setIsUpdatingRegStatus] = useState(false);
+  const [regStatusReason, setRegStatusReason] = useState('');
+
   const toast = useToast();
 
   const handleChangePassword = async (e: React.FormEvent) => {
@@ -87,11 +102,38 @@ export const AdminDashboard: React.FC = () => {
     }
   };
 
+  const handleToggleRegistration = async () => {
+    const targetStatus = !isRegistrationOpen;
+    try {
+      setIsUpdatingRegStatus(true);
+      const res = await setAdminRegistrationStatus({
+        isOpen: targetStatus,
+        reason: regStatusReason.trim() || undefined,
+      });
+      setIsRegistrationOpen(res.isOpen);
+      setShowRegStatusModal(false);
+      setRegStatusReason('');
+      if (res.isOpen) {
+        toast.success('Registration has been RESUMED successfully. Public applicants can now register.');
+      } else {
+        toast.warning('Registration has been STOPPED. Student registration form and APIs are now disabled.');
+      }
+    } catch (err: any) {
+      toast.error(err.message || 'Failed to update registration status');
+    } finally {
+      setIsUpdatingRegStatus(false);
+    }
+  };
+
   const loadStats = async () => {
     try {
       setIsLoading(true);
-      const data = await getAdminDashboardStats();
-      setStats(data);
+      const [statsData, regStatus] = await Promise.all([
+        getAdminDashboardStats(),
+        getAdminRegistrationStatus().catch(() => ({ isOpen: true, message: '' })),
+      ]);
+      setStats(statsData);
+      setIsRegistrationOpen(regStatus.isOpen);
     } catch (err: any) {
       toast.error('Failed to load dashboard statistics: ' + err.message);
     } finally {
@@ -131,7 +173,7 @@ export const AdminDashboard: React.FC = () => {
   return (
     <div className="container mx-auto px-4 py-8 space-y-8 max-w-7xl">
       {/* Top Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-200 pb-6">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-200 pb-6">
         <div className="space-y-1">
           <div className="flex items-center gap-2">
             <span className="text-xs font-bold uppercase tracking-wider text-police-600 bg-police-100 px-2.5 py-0.5 rounded-full">
@@ -139,13 +181,46 @@ export const AdminDashboard: React.FC = () => {
             </span>
             <span className="text-xs text-slate-400">•</span>
             <span className="text-xs text-slate-500 font-mono">Alwar Police Cyber Cell</span>
+            <span className="text-xs text-slate-400">•</span>
+            {isRegistrationOpen ? (
+              <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-800 text-xs font-bold border border-emerald-300">
+                <span className="w-2 h-2 rounded-full bg-emerald-500 animate-ping"></span>
+                REGISTRATION: ACTIVE
+              </span>
+            ) : (
+              <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-rose-100 text-rose-800 text-xs font-bold border border-rose-300">
+                <span className="w-2 h-2 rounded-full bg-rose-600"></span>
+                REGISTRATION: STOPPED
+              </span>
+            )}
           </div>
           <h1 className="text-2xl sm:text-3xl font-black text-police-900 tracking-tight">
             Internship Programme Dashboard 2026
           </h1>
         </div>
 
-        <div className="flex items-center gap-3">
+        <div className="flex flex-wrap items-center gap-3">
+          {/* Prominent Stop / Resume Registration Button */}
+          {isRegistrationOpen ? (
+            <button
+              onClick={() => setShowRegStatusModal(true)}
+              className="px-4 py-2.5 bg-rose-600 hover:bg-rose-700 text-white rounded-xl text-xs font-bold shadow-sm transition-all flex items-center gap-2"
+              title="Stop new student registrations"
+            >
+              <PauseCircle className="w-4 h-4" />
+              <span>Stop Registration</span>
+            </button>
+          ) : (
+            <button
+              onClick={() => setShowRegStatusModal(true)}
+              className="px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold shadow-sm transition-all flex items-center gap-2"
+              title="Resume student registrations"
+            >
+              <PlayCircle className="w-4 h-4" />
+              <span>Resume Registration</span>
+            </button>
+          )}
+
           <button
             onClick={() => setShowPasswordModal(true)}
             className="p-2.5 bg-white hover:bg-slate-100 text-police-900 rounded-xl border border-slate-200 shadow-xs transition-colors flex items-center gap-1.5 text-xs font-semibold"
@@ -559,6 +634,130 @@ export const AdminDashboard: React.FC = () => {
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* REGISTRATION TOGGLE CONFIRMATION MODAL */}
+      {showRegStatusModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs">
+          <div className="bg-white rounded-2xl shadow-2xl max-w-lg w-full border border-slate-200 overflow-hidden animate-in fade-in zoom-in duration-200">
+            {/* Header */}
+            <div className={`p-6 ${isRegistrationOpen ? 'bg-rose-50 border-b border-rose-100' : 'bg-emerald-50 border-b border-emerald-100'} flex items-start gap-4`}>
+              <div className={`p-3 rounded-2xl shrink-0 ${isRegistrationOpen ? 'bg-rose-600 text-white' : 'bg-emerald-600 text-white'}`}>
+                {isRegistrationOpen ? <PauseCircle className="w-6 h-6" /> : <PlayCircle className="w-6 h-6" />}
+              </div>
+              <div className="space-y-1">
+                <span className={`text-[10px] font-bold uppercase tracking-wider ${isRegistrationOpen ? 'text-rose-700' : 'text-emerald-700'}`}>
+                  Admin System Control
+                </span>
+                <h3 className="text-lg font-bold text-slate-900">
+                  {isRegistrationOpen ? 'Confirm: Stop Public Registration' : 'Confirm: Resume Public Registration'}
+                </h3>
+              </div>
+            </div>
+
+            {/* Content */}
+            <div className="p-6 space-y-4 text-xs sm:text-sm text-slate-600">
+              {isRegistrationOpen ? (
+                <div className="space-y-3">
+                  <div className="p-4 rounded-xl bg-amber-50 border border-amber-200 text-amber-900 space-y-2">
+                    <div className="font-bold flex items-center gap-2 text-amber-800">
+                      <AlertTriangle className="w-4 h-4" />
+                      <span>Immediate Effects of Stopping Registration:</span>
+                    </div>
+                    <ul className="list-disc list-inside space-y-1 text-xs text-amber-800/90 font-medium">
+                      <li>Public registration form on the portal will be disabled immediately.</li>
+                      <li>Direct API registration requests will be rejected server-side (HTTP 403).</li>
+                      <li>Public visitors will see the official "Registration Closed" notice.</li>
+                      <li>Existing applications and verification links remain completely untouched.</li>
+                    </ul>
+                  </div>
+
+                  <div className="space-y-1.5">
+                    <label className="text-xs font-bold text-slate-700 uppercase tracking-wider block">
+                      Administrative Reason / Log Note (Optional)
+                    </label>
+                    <input
+                      type="text"
+                      value={regStatusReason}
+                      onChange={(e) => setRegStatusReason(e.target.value)}
+                      placeholder="e.g. Target batch capacity reached (1,200 applicants)"
+                      className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-xs focus:ring-2 focus:ring-rose-500 focus:outline-hidden"
+                    />
+                  </div>
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  <div className="p-4 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-900 space-y-2">
+                    <div className="font-bold flex items-center gap-2 text-emerald-800">
+                      <CheckCircle className="w-4 h-4" />
+                      <span>Immediate Effects of Resuming Registration:</span>
+                    </div>
+                    <ul className="list-disc list-inside space-y-1 text-xs text-emerald-800/90 font-medium">
+                      <li>Public registration form will become active for eligible candidates.</li>
+                      <li>API will accept valid candidate submissions.</li>
+                      <li>Application sequence numbering continues normally.</li>
+                    </ul>
+                  </div>
+
+                  <div className="space-y-1.5">
+                    <label className="text-xs font-bold text-slate-700 uppercase tracking-wider block">
+                      Administrative Reason / Log Note (Optional)
+                    </label>
+                    <input
+                      type="text"
+                      value={regStatusReason}
+                      onChange={(e) => setRegStatusReason(e.target.value)}
+                      placeholder="e.g. Reopened for final spot verification"
+                      className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-xs focus:ring-2 focus:ring-emerald-500 focus:outline-hidden"
+                    />
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Actions */}
+            <div className="bg-slate-50 px-6 py-4 border-t border-slate-100 flex items-center justify-end gap-3">
+              <button
+                type="button"
+                onClick={() => {
+                  setShowRegStatusModal(false);
+                  setRegStatusReason('');
+                }}
+                disabled={isUpdatingRegStatus}
+                className="px-4 py-2.5 text-xs font-semibold text-slate-700 hover:bg-slate-200 bg-white border border-slate-300 rounded-xl transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={handleToggleRegistration}
+                disabled={isUpdatingRegStatus}
+                className={`px-5 py-2.5 text-xs font-bold text-white rounded-xl shadow-md transition-all flex items-center gap-2 disabled:opacity-50 ${
+                  isRegistrationOpen
+                    ? 'bg-rose-600 hover:bg-rose-700 shadow-rose-900/20'
+                    : 'bg-emerald-600 hover:bg-emerald-700 shadow-emerald-900/20'
+                }`}
+              >
+                {isUpdatingRegStatus ? (
+                  <>
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                    <span>Applying Changes...</span>
+                  </>
+                ) : isRegistrationOpen ? (
+                  <>
+                    <PauseCircle className="w-4 h-4" />
+                    <span>Stop Registration Now</span>
+                  </>
+                ) : (
+                  <>
+                    <PlayCircle className="w-4 h-4" />
+                    <span>Resume Registration Now</span>
+                  </>
+                )}
+              </button>
+            </div>
           </div>
         </div>
       )}

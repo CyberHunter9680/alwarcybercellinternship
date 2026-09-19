@@ -6,6 +6,7 @@ import { ApplicationService } from '../services/applicationService.js';
 import { StorageService } from '../services/storageService.js';
 import { PDFService } from '../services/pdfService.js';
 import { AdminService } from '../services/adminService.js';
+import { SystemService } from '../services/systemService.js';
 import { sendSuccess, sendError } from '../utils/responseHelper.js';
 import { ENV } from '../config/env.js';
 
@@ -73,6 +74,16 @@ export class ApplicationController {
    */
   static async submitApplication(req: Request, res: Response, next: NextFunction) {
     try {
+      // 0. Enforce Server-Side Registration Status
+      const regStatus = await SystemService.isRegistrationOpen();
+      if (!regStatus.isOpen) {
+        return sendError(
+          res,
+          regStatus.message || SystemService.DEFAULT_CLOSED_MESSAGE,
+          403
+        );
+      }
+
       if (!req.file) {
         return sendError(res, 'Resume file is required (PDF, DOC, or DOCX up to 5MB).', 400);
       }
@@ -348,4 +359,17 @@ export class ApplicationController {
       next(error);
     }
   }
+
+  /**
+   * Public endpoint to check if student registrations are currently open
+   */
+  static async getPublicRegistrationStatus(req: Request, res: Response, next: NextFunction) {
+    try {
+      const status = await SystemService.isRegistrationOpen();
+      return sendSuccess(res, status);
+    } catch (error) {
+      next(error);
+    }
+  }
 }
+

@@ -20,12 +20,15 @@ import {
   Calendar,
   Layers,
   ArrowUpDown,
+  Trash2,
+  AlertTriangle,
 } from 'lucide-react';
 import {
   getAdminApplications,
   updateApplicationStatusApi,
   exportApplicationsFile,
   downloadRegistrationSlipPDF,
+  deleteApplicationApi,
 } from '../../services/api.js';
 import { Application, ApplicationStatus, PaginationMeta } from '../../types/index.js';
 import { CyberBadge } from '../../components/CyberBadge.js';
@@ -63,6 +66,12 @@ export const AdminApplications: React.FC = () => {
   const [dossierModalOpen, setDossierModalOpen] = useState(false);
   const [statusModalOpen, setStatusModalOpen] = useState(false);
   const [slipModalOpen, setSlipModalOpen] = useState(false);
+
+  // Delete Modal State
+  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+  const [appToDelete, setAppToDelete] = useState<Application | null>(null);
+  const [deleteReason, setDeleteReason] = useState('');
+  const [isDeletingApp, setIsDeletingApp] = useState(false);
 
   // Status Change State
   const [newStatus, setNewStatus] = useState<ApplicationStatus>('SUBMITTED');
@@ -183,11 +192,38 @@ export const AdminApplications: React.FC = () => {
       a.download = `Alwar_Police_Cyber_Internship_${app.applicationId}.pdf`;
       document.body.appendChild(a);
       a.click();
-      window.URL.revokeObjectURL(url);
-      document.body.removeChild(a);
       toast.success('Registration Slip downloaded.');
     } catch (err: any) {
       toast.error('Download failed: ' + err.message);
+    }
+  };
+
+  const openDeleteModal = (app: Application) => {
+    setAppToDelete(app);
+    setDeleteReason('');
+    setDeleteModalOpen(true);
+  };
+
+  const handleDeleteConfirm = async () => {
+    if (!appToDelete) return;
+
+    try {
+      setIsDeletingApp(true);
+      const res = await deleteApplicationApi(appToDelete.id, deleteReason.trim() || undefined);
+      toast.success(`Application ${res.deletedApplicationId} (${res.fullName}) was deleted successfully.`);
+      setDeleteModalOpen(false);
+      setAppToDelete(null);
+      setDeleteReason('');
+      if (selectedApp && selectedApp.id === appToDelete.id) {
+        setDossierModalOpen(false);
+        setSelectedApp(null);
+      }
+      // Refresh list
+      fetchApplications();
+    } catch (err: any) {
+      toast.error('Deletion failed: ' + err.message);
+    } finally {
+      setIsDeletingApp(false);
     }
   };
 
@@ -474,6 +510,15 @@ export const AdminApplications: React.FC = () => {
                         >
                           <ExternalLink className="w-4 h-4" />
                         </a>
+
+                        {/* Delete Application */}
+                        <button
+                          onClick={() => openDeleteModal(app)}
+                          className="p-1.5 rounded-lg bg-slate-100 hover:bg-rose-100 text-rose-700 transition-colors"
+                          title="Delete Fake / Invalid Application"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
                       </div>
                     </td>
                   </tr>
@@ -518,7 +563,7 @@ export const AdminApplications: React.FC = () => {
             <div className="flex items-start justify-between border-b border-slate-100 pb-4">
               <div className="space-y-1">
                 <div className="flex items-center gap-2">
-                  <span className="font-mono text-xs font-bold text-police-900 bg-police-100 px-2 py-0.5 rounded">
+                  <span className="font-mono font-bold text-police-900 text-base">
                     {selectedApp.applicationId}
                   </span>
                   <CyberBadge status={selectedApp.status} size="sm" />
@@ -527,79 +572,71 @@ export const AdminApplications: React.FC = () => {
               </div>
               <button
                 onClick={() => setDossierModalOpen(false)}
-                className="text-slate-400 hover:text-slate-700 p-1"
+                className="p-1 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100"
               >
                 <X className="w-5 h-5" />
               </button>
             </div>
 
-            {/* Dossier Content */}
+            {/* Dossier Grid Details */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
+              <div className="p-3 bg-slate-50 rounded-xl space-y-1 border border-slate-100">
+                <span className="text-slate-400 font-medium uppercase text-[10px]">Email Address</span>
+                <p className="font-semibold text-slate-800 font-mono">{selectedApp.email}</p>
+              </div>
+              <div className="p-3 bg-slate-50 rounded-xl space-y-1 border border-slate-100">
+                <span className="text-slate-400 font-medium uppercase text-[10px]">Mobile Number</span>
+                <p className="font-semibold text-slate-800 font-mono">{selectedApp.mobile}</p>
+              </div>
+              <div className="p-3 bg-slate-50 rounded-xl space-y-1 border border-slate-100">
+                <span className="text-slate-400 font-medium uppercase text-[10px]">Enrolled Course</span>
+                <p className="font-semibold text-slate-800">{selectedApp.course.replace('_', '.')}</p>
+              </div>
+              <div className="p-3 bg-slate-50 rounded-xl space-y-1 border border-slate-100">
+                <span className="text-slate-400 font-medium uppercase text-[10px]">Academic Year</span>
+                <p className="font-semibold text-slate-800">
+                  {selectedApp.year.replace('_', ' ').replace('YEAR', 'Year')}
+                </p>
+              </div>
+              <div className="p-3 bg-slate-50 rounded-xl space-y-1 border border-slate-100 sm:col-span-2">
+                <span className="text-slate-400 font-medium uppercase text-[10px]">University / College</span>
+                <p className="font-semibold text-slate-800">{selectedApp.universityName}</p>
+              </div>
+            </div>
+
+            {/* Skills & Motivation */}
             <div className="space-y-4 text-xs">
-              {/* Personal & Academic Grid */}
-              <div className="grid grid-cols-2 gap-3 bg-slate-50 p-4 rounded-xl border border-slate-200">
-                <div>
-                  <span className="text-slate-500 block">Mobile Number:</span>
-                  <span className="font-mono font-bold text-slate-900">{selectedApp.mobile}</span>
-                </div>
-                <div>
-                  <span className="text-slate-500 block">Email Address:</span>
-                  <span className="font-mono font-bold text-slate-900">{selectedApp.email}</span>
-                </div>
-                <div>
-                  <span className="text-slate-500 block">Course & Year:</span>
-                  <span className="font-bold text-slate-900">
-                    {selectedApp.course.replace('_', '.')} • {selectedApp.year.replace('_', ' ').replace('YEAR', 'Year')}
-                  </span>
-                </div>
-                <div>
-                  <span className="text-slate-500 block">University / Institution:</span>
-                  <span className="font-semibold text-slate-900">{selectedApp.universityName}</span>
+              <div className="space-y-1.5">
+                <span className="text-slate-500 font-bold uppercase text-[10px]">Skills & Proficiencies:</span>
+                <div className="flex flex-wrap gap-1.5">
+                  {selectedApp.skills && selectedApp.skills.length > 0 ? (
+                    selectedApp.skills.map((skill: string) => (
+                      <span
+                        key={skill}
+                        className="px-2.5 py-1 bg-police-50 text-police-800 rounded-lg font-semibold text-[11px] border border-police-200"
+                      >
+                        {skill}
+                      </span>
+                    ))
+                  ) : (
+                    <span className="text-slate-400">None specified</span>
+                  )}
+                  {selectedApp.customSkills &&
+                    selectedApp.customSkills.map((cSkill: string) => (
+                      <span
+                        key={cSkill}
+                        className="px-2.5 py-1 bg-cyan-50 text-cyan-800 rounded-lg font-semibold text-[11px] border border-cyan-200"
+                      >
+                        + {cSkill}
+                      </span>
+                    ))}
                 </div>
               </div>
 
-              {/* Skills */}
               <div className="space-y-1.5">
-                <span className="text-slate-700 font-bold uppercase tracking-wider block">
-                  Cyber Security Skills ({selectedApp.skills.length + selectedApp.customSkills.length}):
-                </span>
-                <div className="flex flex-wrap gap-1.5 p-3 bg-slate-50 rounded-xl border border-slate-200">
-                  {[...selectedApp.skills, ...selectedApp.customSkills].map((s, idx) => (
-                    <span key={idx} className="bg-white px-2.5 py-1 rounded border border-slate-300 font-medium text-slate-800">
-                      {s}
-                    </span>
-                  ))}
-                </div>
-              </div>
-
-              {/* Motivation */}
-              <div className="space-y-1.5">
-                <span className="text-slate-700 font-bold uppercase tracking-wider block">
-                  Statement of Motivation:
-                </span>
-                <div className="p-4 bg-slate-50 rounded-xl border border-slate-200 italic text-slate-700 leading-relaxed">
-                  "{selectedApp.motivation}"
-                </div>
-              </div>
-
-              {/* Resume File */}
-              <div className="space-y-1.5">
-                <span className="text-slate-700 font-bold uppercase tracking-wider block">
-                  Resume Attachment:
-                </span>
-                <div className="p-3 bg-slate-50 rounded-xl border border-slate-200 flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <FileText className="w-4 h-4 text-police-700" />
-                    <span className="font-semibold text-slate-900">{selectedApp.resumeFilename}</span>
-                  </div>
-                  <a
-                    href={`/api/applications/resume/${selectedApp.id}`}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="px-3 py-1 bg-police-800 hover:bg-police-900 text-white rounded text-xs font-semibold flex items-center gap-1"
-                  >
-                    <span>View Resume</span>
-                    <ExternalLink className="w-3 h-3" />
-                  </a>
+                <span className="text-slate-500 font-bold uppercase text-[10px]">Statement of Motivation:</span>
+                <div className="p-3 bg-slate-50 rounded-xl border border-slate-200 text-slate-700 leading-relaxed max-h-36 overflow-y-auto whitespace-pre-wrap">
+                  {selectedApp.motivation || 'No statement provided.'}
                 </div>
               </div>
 
@@ -613,17 +650,29 @@ export const AdminApplications: React.FC = () => {
             </div>
 
             {/* Modal Actions */}
-            <div className="border-t border-slate-100 pt-4 flex items-center justify-between">
-              <button
-                onClick={() => {
-                  setDossierModalOpen(false);
-                  openStatusChange(selectedApp);
-                }}
-                className="px-4 py-2 bg-amber-600 hover:bg-amber-700 text-white rounded-lg font-bold text-xs flex items-center gap-1.5 shadow-xs"
-              >
-                <Layers className="w-4 h-4" />
-                <span>Change Status</span>
-              </button>
+            <div className="border-t border-slate-100 pt-4 flex flex-wrap items-center justify-between gap-3">
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => {
+                    setDossierModalOpen(false);
+                    openStatusChange(selectedApp);
+                  }}
+                  className="px-4 py-2 bg-amber-600 hover:bg-amber-700 text-white rounded-lg font-bold text-xs flex items-center gap-1.5 shadow-xs"
+                >
+                  <Layers className="w-4 h-4" />
+                  <span>Change Status</span>
+                </button>
+                <button
+                  onClick={() => {
+                    setDossierModalOpen(false);
+                    openDeleteModal(selectedApp);
+                  }}
+                  className="px-4 py-2 bg-rose-100 hover:bg-rose-200 text-rose-800 rounded-lg font-bold text-xs flex items-center gap-1.5"
+                >
+                  <Trash2 className="w-4 h-4 text-rose-600" />
+                  <span>Delete Application</span>
+                </button>
+              </div>
 
               <div className="flex items-center gap-2">
                 <button
@@ -716,6 +765,116 @@ export const AdminApplications: React.FC = () => {
                   </>
                 ) : (
                   <span>Update Application Status</span>
+                )}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* MODAL 3: DELETE APPLICATION CONFIRMATION */}
+      {deleteModalOpen && appToDelete && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-xs">
+          <div className="bg-white rounded-2xl shadow-2xl max-w-lg w-full border border-slate-200 overflow-hidden animate-in fade-in zoom-in duration-200">
+            {/* Header */}
+            <div className="p-6 bg-rose-50 border-b border-rose-100 flex items-start gap-4">
+              <div className="p-3 rounded-2xl bg-rose-600 text-white shrink-0">
+                <Trash2 className="w-6 h-6" />
+              </div>
+              <div className="space-y-1">
+                <span className="text-[10px] font-bold uppercase tracking-wider text-rose-700">
+                  Permanent Admin Action
+                </span>
+                <h3 className="text-lg font-bold text-slate-900">Delete Application Record</h3>
+                <p className="text-xs text-rose-700 font-semibold">
+                  Are you sure you want to permanently delete this application? This action cannot be undone.
+                </p>
+              </div>
+            </div>
+
+            {/* Candidate Details Summary */}
+            <div className="p-6 space-y-4 text-xs sm:text-sm">
+              <div className="p-4 rounded-xl bg-slate-50 border border-slate-200 space-y-2.5">
+                <div className="flex justify-between items-center pb-2 border-b border-slate-200/80">
+                  <span className="text-slate-500 font-medium">Application ID:</span>
+                  <span className="font-mono font-bold text-police-900 text-sm">{appToDelete.applicationId}</span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-slate-500 font-medium">Candidate Name:</span>
+                  <span className="font-bold text-slate-900">{appToDelete.fullName}</span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-slate-500 font-medium">Email Address:</span>
+                  <span className="font-mono text-slate-800">{appToDelete.email}</span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-slate-500 font-medium">Mobile Number:</span>
+                  <span className="font-mono text-slate-800">{appToDelete.mobile}</span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-slate-500 font-medium">Course:</span>
+                  <span className="font-semibold text-slate-800">
+                    {appToDelete.course.replace('_', '.')} • {appToDelete.year.replace('_', ' ').replace('YEAR', 'Year')}
+                  </span>
+                </div>
+              </div>
+
+              {/* Warning box */}
+              <div className="p-3 rounded-xl bg-amber-50 border border-amber-200 text-amber-900 text-xs flex items-start gap-2.5">
+                <AlertTriangle className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
+                <div className="space-y-0.5">
+                  <span className="font-bold">Database & Sequence Safeguard:</span>
+                  <p className="text-slate-600 leading-normal">
+                    Only this specific application record will be deleted. Existing applicant IDs and sequence counters will not be renumbered or decreased.
+                  </p>
+                </div>
+              </div>
+
+              {/* Reason input */}
+              <div className="space-y-1.5">
+                <label className="text-xs font-bold text-slate-700 uppercase tracking-wider block">
+                  Reason for Deletion (Recorded in Audit Logs)
+                </label>
+                <input
+                  type="text"
+                  value={deleteReason}
+                  onChange={(e) => setDeleteReason(e.target.value)}
+                  placeholder="e.g. Fake registration test entry / Invalid contact details"
+                  className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-xs focus:ring-2 focus:ring-rose-500 focus:outline-hidden"
+                />
+              </div>
+            </div>
+
+            {/* Actions */}
+            <div className="bg-slate-50 px-6 py-4 border-t border-slate-100 flex items-center justify-end gap-3">
+              <button
+                type="button"
+                onClick={() => {
+                  setDeleteModalOpen(false);
+                  setAppToDelete(null);
+                  setDeleteReason('');
+                }}
+                disabled={isDeletingApp}
+                className="px-4 py-2.5 text-xs font-semibold text-slate-700 hover:bg-slate-200 bg-white border border-slate-300 rounded-xl transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={handleDeleteConfirm}
+                disabled={isDeletingApp}
+                className="px-5 py-2.5 text-xs font-bold text-white bg-rose-600 hover:bg-rose-700 rounded-xl shadow-md shadow-rose-900/20 transition-all flex items-center gap-2 disabled:opacity-50"
+              >
+                {isDeletingApp ? (
+                  <>
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                    <span>Deleting Record...</span>
+                  </>
+                ) : (
+                  <>
+                    <Trash2 className="w-4 h-4" />
+                    <span>Permanently Delete Application</span>
+                  </>
                 )}
               </button>
             </div>

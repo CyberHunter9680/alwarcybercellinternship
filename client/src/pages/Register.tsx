@@ -19,7 +19,7 @@ import {
   Edit3,
 } from 'lucide-react';
 import { RegistrationFormData, CourseType, AcademicYear } from '../types/index.js';
-import { submitStudentApplication } from '../services/api.js';
+import { submitStudentApplication, getPublicRegistrationStatus } from '../services/api.js';
 import { useToast } from '../context/ToastContext.js';
 
 const PREDEFINED_SKILLS = [
@@ -68,9 +68,28 @@ export const Register: React.FC = () => {
   const navigate = useNavigate();
   const toast = useToast();
 
+  const [isCheckingStatus, setIsCheckingStatus] = useState(true);
+  const [isRegistrationOpen, setIsRegistrationOpen] = useState(true);
+  const [closedNoticeMessage, setClosedNoticeMessage] = useState('');
+
   const [currentStep, setCurrentStep] = useState(1);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submissionError, setSubmissionError] = useState<string | null>(null);
+
+  // Check Registration Open Status
+  useEffect(() => {
+    getPublicRegistrationStatus()
+      .then((res) => {
+        setIsRegistrationOpen(res.isOpen);
+        if (res.message) setClosedNoticeMessage(res.message);
+      })
+      .catch(() => {
+        setIsRegistrationOpen(true);
+      })
+      .finally(() => {
+        setIsCheckingStatus(false);
+      });
+  }, []);
 
   // Form Data State
   const [formData, setFormData] = useState<RegistrationFormData>({
@@ -349,6 +368,90 @@ export const Register: React.FC = () => {
       setIsSubmitting(false);
     }
   };
+
+  if (isCheckingStatus) {
+    return (
+      <div className="container mx-auto px-4 py-24 max-w-xl text-center space-y-4">
+        <Loader2 className="w-10 h-10 text-police-700 animate-spin mx-auto" />
+        <p className="text-sm font-semibold text-slate-600">Verifying registration portal status...</p>
+      </div>
+    );
+  }
+
+  if (!isRegistrationOpen) {
+    return (
+      <div className="container mx-auto px-4 py-16 max-w-2xl">
+        <div className="bg-white rounded-2xl border border-slate-200 shadow-xl overflow-hidden animate-in fade-in zoom-in duration-300">
+          {/* Top header bar */}
+          <div className="bg-gradient-to-r from-police-950 via-police-900 to-police-950 p-6 text-white text-center space-y-3">
+            <div className="w-16 h-16 rounded-2xl bg-white p-2 mx-auto border border-police-500/50 shadow-md flex items-center justify-center">
+              <img
+                src="/Rajasthan-Police.webp"
+                alt="Rajasthan Police Official Logo"
+                className="w-full h-full object-contain"
+              />
+            </div>
+            <div>
+              <span className="inline-block px-3 py-0.5 rounded-full bg-rose-500/20 text-rose-300 border border-rose-500/30 text-xs font-bold uppercase tracking-wider mb-1">
+                Portal Closed
+              </span>
+              <h1 className="text-xl sm:text-2xl font-bold tracking-tight">
+                Alwar Police Internship Programme 2026
+              </h1>
+              <p className="text-xs text-police-300 font-mono">Official Cyber Security Internship Notice</p>
+            </div>
+          </div>
+
+          {/* Body with exact formal message */}
+          <div className="p-6 sm:p-8 space-y-6">
+            <div className="p-5 rounded-xl bg-amber-50 border border-amber-200 text-slate-800 space-y-3">
+              <div className="flex items-center gap-2 text-amber-800 font-bold text-sm">
+                <AlertCircle className="w-5 h-5 text-amber-600" />
+                <span>Notice to Applicants</span>
+              </div>
+              <p className="text-sm sm:text-base leading-relaxed text-slate-700 font-medium whitespace-pre-line">
+                {closedNoticeMessage ||
+                  `Registration for the Alwar Police Internship Programme 2026 is currently closed.
+
+Thank you for your interest in the programme. The registration window has now been closed, and new applications are no longer being accepted.
+
+For further information or official updates, please refer to the official programme communication channels.`}
+              </p>
+            </div>
+
+            <div className="space-y-3 text-xs text-slate-500 border-t border-slate-100 pt-4">
+              <div className="flex items-center gap-2">
+                <Shield className="w-4 h-4 text-police-700" />
+                <span>Superintendent of Police Office, Cyber Crime Cell, Alwar (Rajasthan)</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <CheckCircle2 className="w-4 h-4 text-emerald-600" />
+                <span>Already registered students can still verify or download their slips via the Home portal.</span>
+              </div>
+            </div>
+
+            <div className="flex flex-col sm:flex-row items-center gap-3 pt-2">
+              <button
+                type="button"
+                onClick={() => navigate('/')}
+                className="w-full sm:w-1/2 px-4 py-3 rounded-xl bg-police-900 hover:bg-police-950 text-white font-bold text-xs flex items-center justify-center gap-2 transition-colors shadow-sm"
+              >
+                <ArrowLeft className="w-4 h-4" />
+                <span>Return to Home</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => navigate('/#helpdesk')}
+                className="w-full sm:w-1/2 px-4 py-3 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 font-semibold text-xs flex items-center justify-center gap-2 transition-colors"
+              >
+                <span>Helpdesk & Support</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="container mx-auto px-4 py-12 max-w-3xl">

@@ -6,6 +6,9 @@ import { requireAdminAuth } from '../middleware/authMiddleware.js';
 
 const router = Router();
 
+// Public registration open/closed status
+router.get('/status', ApplicationController.getPublicRegistrationStatus);
+
 // Student submission endpoint with rate limiting & resume upload
 router.post(
   '/',

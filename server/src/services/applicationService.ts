@@ -29,9 +29,16 @@ export class ApplicationService {
    */
   static async createApplication(
     input: CreateApplicationInput,
-    fileInfo: StoredFileInfo,
+    fileInfo?: StoredFileInfo,
     ipAddress?: string
   ) {
+    // 0. Check if registration is open
+    const { SystemService } = await import('./systemService.js');
+    const regStatus = await SystemService.isRegistrationOpen();
+    if (!regStatus.isOpen) {
+      throw new Error(regStatus.message);
+    }
+
     // 1. Check for duplicate registration by email or mobile
     const existing = await prisma.application.findFirst({
       where: {
@@ -63,10 +70,10 @@ export class ApplicationService {
         skills: input.skills,
         customSkills: input.customSkills || [],
         motivation: input.motivation.trim(),
-        resumeFilename: fileInfo.originalFilename,
-        resumeUrl: fileInfo.url || fileInfo.savedFilename,
-        resumeMimeType: fileInfo.mimeType,
-        resumeSize: fileInfo.size,
+        resumeFilename: fileInfo?.originalFilename || 'resume.pdf',
+        resumeUrl: fileInfo?.url || fileInfo?.savedFilename || 'resume.pdf',
+        resumeMimeType: fileInfo?.mimeType || 'application/pdf',
+        resumeSize: fileInfo?.size || 1024,
         status: ApplicationStatus.SUBMITTED,
         ipAddress: ipAddress || null,
       },
@@ -400,4 +407,58 @@ export class ApplicationService {
       recentApplications,
     };
   }
+
+  /**
+   * Securely deletes an individual application with an audit trail
+   */
+  static async deleteApplication(
+    idOrAppId: string,
+    adminId?: string,
+    reason?: string,
+    ipAddress?: string,
+    userAgent?: string
+  ) {
+    const application = await this.getByIdOrAppId(idOrAppId);
+    if (!application) {
+      throw new Error('Application not found');
+    }
+
+    // 1. Audit trail record created before removal
+    const deleteReason = reason?.trim() || 'Invalid / Fake registration record';
+    try {
+      const { AuditService } = await import('./auditService.js');
+      await AuditService.log({
+        adminId,
+        applicationId: undefined, // Avoid FK issues upon deletion
+        action: 'APPLICATION_DELETED',
+        details: `Deleted application ${application.applicationId} (${application.fullName}, Email: ${application.email}, Mobile: ${application.mobile}). Reason: ${deleteReason}`,
+        ipAddress,
+        userAgent,
+      });
+    } catch (auditErr) {
+      console.warn('⚠️ Warning: Failed to write deletion audit log:', auditErr);
+    }
+
+    // 2. Delete application record from database
+    await prisma.application.delete({
+      where: { id: application.id },
+    });
+
+    // 3. Best-effort deletion of locally cached resume file if present
+    if (application.resumeFilename) {
+      try {
+        const { StorageService } = await import('./storageService.js');
+        await StorageService.deleteResume(application.resumeFilename);
+      } catch {
+        // Non-fatal
+      }
+    }
+
+    return {
+      id: application.id,
+      applicationId: application.applicationId,
+      fullName: application.fullName,
+    };
+  }
 }
+

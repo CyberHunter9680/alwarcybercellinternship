@@ -5,6 +5,7 @@ import { AdminService } from '../services/adminService.js';
 import { ApplicationService } from '../services/applicationService.js';
 import { AuditService } from '../services/auditService.js';
 import { ExportService } from '../services/exportService.js';
+import { SystemService } from '../services/systemService.js';
 import { AuthenticatedRequest } from '../middleware/authMiddleware.js';
 import { sendSuccess, sendError } from '../utils/responseHelper.js';
 import { ApplicationStatus } from '@prisma/client';
@@ -276,4 +277,84 @@ export class AdminController {
       next(error);
     }
   }
+
+  /**
+   * Retrieves current registration status for Admin
+   */
+  static async getRegistrationStatus(req: AuthenticatedRequest, res: Response, next: NextFunction) {
+    try {
+      const status = await SystemService.isRegistrationOpen();
+      return sendSuccess(res, status);
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  /**
+   * Updates registration open/closed status
+   */
+  static async setRegistrationStatus(req: AuthenticatedRequest, res: Response, next: NextFunction) {
+    try {
+      const { isOpen, message, reason } = req.body;
+      if (typeof isOpen !== 'boolean') {
+        return sendError(res, 'isOpen must be a boolean value (true or false).', 400);
+      }
+
+      const result = await SystemService.setRegistrationStatus(isOpen, message);
+
+      const action = isOpen ? 'REGISTRATION_RESUMED' : 'REGISTRATION_STOPPED';
+      const details = `Admin ${req.admin?.email} ${isOpen ? 'resumed' : 'stopped'} student registrations.${reason ? ` Reason: ${reason}` : ''}`;
+
+      await AuditService.log({
+        adminId: req.admin?.id,
+        action,
+        details,
+        ipAddress: (req.headers['x-forwarded-for'] as string) || req.socket.remoteAddress,
+        userAgent: req.headers['user-agent'],
+      });
+
+      return sendSuccess(
+        res,
+        result,
+        isOpen
+          ? 'Registration has been resumed successfully. Students can now submit applications.'
+          : 'Registration has been stopped successfully. Public form submissions are now closed.'
+      );
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  /**
+   * Permanently deletes a single fake/invalid application
+   */
+  static async deleteApplication(req: AuthenticatedRequest, res: Response, next: NextFunction) {
+    try {
+      const id = req.params.id as string;
+      const reason = (req.body?.reason || req.query?.reason) as string | undefined;
+
+      const ip = (req.headers['x-forwarded-for'] as string) || req.socket.remoteAddress;
+      const userAgent = req.headers['user-agent'] as string;
+
+      const deleted = await ApplicationService.deleteApplication(
+        id,
+        req.admin?.id,
+        reason,
+        ip,
+        userAgent
+      );
+
+      return sendSuccess(
+        res,
+        deleted,
+        `Application ${deleted.applicationId} (${deleted.fullName}) has been permanently deleted.`
+      );
+    } catch (error: any) {
+      if (error.message === 'Application not found') {
+        return sendError(res, 'Application not found', 404);
+      }
+      next(error);
+    }
+  }
 }
+

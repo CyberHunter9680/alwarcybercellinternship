@@ -177,4 +177,34 @@ export async function getAdminAuditLogs(params: {
   };
 }
 
+export async function getPublicRegistrationStatus(): Promise<{ isOpen: boolean; message: string }> {
+  const response = await api.get('/system/registration-status');
+  return response.data.data;
+}
+
+export async function getAdminRegistrationStatus(): Promise<{ isOpen: boolean; message: string }> {
+  const response = await api.get('/admin/system/registration-status');
+  return response.data.data;
+}
+
+export async function setAdminRegistrationStatus(payload: {
+  isOpen: boolean;
+  message?: string;
+  reason?: string;
+}): Promise<{ isOpen: boolean; message: string }> {
+  const response = await api.post('/admin/system/registration-status', payload);
+  return response.data.data;
+}
+
+export async function deleteApplicationApi(
+  id: string,
+  reason?: string
+): Promise<{ deletedApplicationId: string; fullName: string }> {
+  const response = await api.delete(`/admin/applications/${id}`, {
+    data: { reason },
+    params: { reason },
+  });
+  return response.data.data;
+}
+
 export default api;
