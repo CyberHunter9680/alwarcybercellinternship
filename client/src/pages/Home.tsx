@@ -19,13 +19,17 @@ import {
   Server,
   Network,
   AlertTriangle,
+  MessageCircle,
+  ShieldCheck,
 } from 'lucide-react';
 import { getPublicRegistrationStatus } from '../services/api.js';
+import { WhatsAppVerificationModal } from '../components/WhatsAppVerificationModal.js';
 
 export const Home: React.FC = () => {
   // Registration status state
   const [isRegistrationOpen, setIsRegistrationOpen] = useState<boolean>(true);
   const [statusMessage, setStatusMessage] = useState<string>('');
+  const [isWhatsAppModalOpen, setIsWhatsAppModalOpen] = useState<boolean>(false);
 
   useEffect(() => {
     getPublicRegistrationStatus()
@@ -37,6 +41,16 @@ export const Home: React.FC = () => {
         // Default to open if check fails gracefully
         setIsRegistrationOpen(true);
       });
+
+    // Automatically open WhatsApp modal if requested via URL hash or query param
+    if (
+      window.location.hash === '#whatsapp' ||
+      window.location.hash === '#whatsapp-group' ||
+      new URLSearchParams(window.location.search).get('whatsapp') === 'true' ||
+      new URLSearchParams(window.location.search).get('whatsapp') === '1'
+    ) {
+      setIsWhatsAppModalOpen(true);
+    }
   }, []);
 
   // Quick eligibility checker state
@@ -176,9 +190,20 @@ For further information or official updates, please refer to the official progra
                   <span>Registration Closed</span>
                 </div>
               )}
+
+              {/* Join Official WhatsApp Group Hero Button */}
+              <button
+                type="button"
+                onClick={() => setIsWhatsAppModalOpen(true)}
+                className="w-full sm:w-auto px-8 py-4 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-bold rounded-xl shadow-lg shadow-emerald-950/40 hover:shadow-emerald-500/20 transition-all flex items-center justify-center gap-2.5 text-base cursor-pointer"
+              >
+                <MessageCircle className="w-5 h-5 fill-white" />
+                <span>Join Official WhatsApp Group</span>
+              </button>
+
               <a
                 href="#helpdesk"
-                className="w-full sm:w-auto px-8 py-4 bg-police-800/80 hover:bg-police-700 text-slate-100 font-semibold rounded-xl border border-police-600/60 transition-all flex items-center justify-center gap-2 text-base backdrop-blur-md"
+                className="w-full sm:w-auto px-6 py-4 bg-police-800/80 hover:bg-police-700 text-slate-100 font-semibold rounded-xl border border-police-600/60 transition-all flex items-center justify-center gap-2 text-base backdrop-blur-md"
               >
                 <span>Helpline & Support</span>
                 <ChevronDown className="w-4 h-4 text-police-400" />
@@ -207,6 +232,73 @@ For further information or official updates, please refer to the official progra
           </div>
         </div>
       </section>
+
+      {/* DOCUMENTS & FURTHER UPDATES - OFFICIAL WHATSAPP GROUP SECTION */}
+      <section id="whatsapp-group" className="container mx-auto px-4 max-w-5xl scroll-mt-24">
+        <div className="relative bg-gradient-to-br from-police-900 via-police-950 to-police-900 rounded-3xl p-8 sm:p-12 border-2 border-emerald-500/30 shadow-2xl overflow-hidden text-white">
+          <div className="absolute -right-20 -top-20 w-80 h-80 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none"></div>
+          <div className="absolute -left-20 -bottom-20 w-80 h-80 bg-cyber-blue/10 rounded-full blur-3xl pointer-events-none"></div>
+
+          <div className="relative z-10 grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+            <div className="lg:col-span-8 space-y-4 text-left">
+              <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-xs font-bold text-emerald-400">
+                <MessageCircle className="w-4 h-4" />
+                <span>Documents & Further Updates</span>
+              </div>
+
+              <div className="space-y-2">
+                <h2 className="text-2xl sm:text-3xl lg:text-4xl font-black tracking-tight text-white">
+                  Join Official WhatsApp Group
+                </h2>
+                <p className="text-sm sm:text-base text-amber-200 font-semibold">
+                  Registration for the programme is now closed.
+                </p>
+                <p className="text-xs sm:text-sm text-slate-300 max-w-2xl leading-relaxed">
+                  Students who have already submitted an application can verify their Application ID and join the official WhatsApp group for document verification and further updates.
+                </p>
+              </div>
+
+              <div className="pt-2">
+                <button
+                  type="button"
+                  onClick={() => setIsWhatsAppModalOpen(true)}
+                  className="px-8 py-4 bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-400 hover:to-teal-400 text-police-950 font-black text-sm sm:text-base rounded-xl shadow-lg shadow-emerald-500/25 hover:shadow-emerald-500/40 transition-all flex items-center gap-3 cursor-pointer"
+                >
+                  <MessageCircle className="w-5 h-5 fill-police-950" />
+                  <span>Join Official WhatsApp Group</span>
+                  <ArrowRight className="w-4 h-4" />
+                </button>
+              </div>
+            </div>
+
+            <div className="lg:col-span-4 bg-police-800/60 backdrop-blur-md p-6 rounded-2xl border border-police-700/80 space-y-3.5 text-left">
+              <div className="flex items-center gap-2 text-xs font-bold text-emerald-400 uppercase tracking-wider">
+                <ShieldCheck className="w-4 h-4" />
+                <span>Verification Requirement</span>
+              </div>
+              <ul className="space-y-2.5 text-xs text-slate-300">
+                <li className="flex items-start gap-2">
+                  <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" />
+                  <span>Enter Application ID from your registration slip</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" />
+                  <span>Instant server-side verification against official database</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" />
+                  <span>Receive official WhatsApp group invitation link</span>
+                </li>
+              </ul>
+              <div className="pt-2 border-t border-police-700/60 text-[11px] text-slate-400 flex items-center gap-1.5">
+                <Lock className="w-3.5 h-3.5 text-slate-500" />
+                <span>Protected against unauthorized join requests</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
 
       {/* ELIGIBILITY SECTION */}
       <section id="eligibility" className="container mx-auto px-4 scroll-mt-24">
@@ -623,6 +715,13 @@ For further information or official updates, please refer to the official progra
           </div>
         </div>
       </section>
+
+      {/* WhatsApp Group Verification Modal Dialog */}
+      <WhatsAppVerificationModal
+        isOpen={isWhatsAppModalOpen}
+        onClose={() => setIsWhatsAppModalOpen(false)}
+      />
     </div>
   );
 };
+

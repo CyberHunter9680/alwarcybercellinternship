@@ -13,8 +13,10 @@ import {
   GraduationCap,
   ExternalLink,
   QrCode,
+  MessageCircle,
 } from 'lucide-react';
 import { RegistrationSlipPDF } from '../components/RegistrationSlipPDF.js';
+import { WhatsAppVerificationModal } from '../components/WhatsAppVerificationModal.js';
 import { getApplicationDetails, downloadRegistrationSlipPDF } from '../services/api.js';
 import { Application } from '../types/index.js';
 import { useToast } from '../context/ToastContext.js';
@@ -42,6 +44,7 @@ export const RegistrationSuccess: React.FC = () => {
 
   const [application, setApplication] = useState<Application | null>(null);
   const [showSlipModal, setShowSlipModal] = useState(false);
+  const [showWhatsAppModal, setShowWhatsAppModal] = useState(false);
   const [isDownloading, setIsDownloading] = useState(false);
 
   // Retrieve token from navigation state or session storage
@@ -219,6 +222,13 @@ export const RegistrationSuccess: React.FC = () => {
             <Printer className="w-4 h-4 text-slate-600" />
             <span>Print Registration Slip</span>
           </button>
+          <button
+            onClick={() => setShowWhatsAppModal(true)}
+            className="w-full sm:w-auto px-6 py-3.5 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-xl text-xs sm:text-sm shadow-md shadow-emerald-600/20 transition-all flex items-center justify-center gap-2 cursor-pointer"
+          >
+            <MessageCircle className="w-4 h-4 fill-white" />
+            <span>Join Official WhatsApp Group</span>
+          </button>
         </div>
 
         {/* Verification Link */}
@@ -239,6 +249,13 @@ export const RegistrationSuccess: React.FC = () => {
           </Link>
         </div>
       </div>
+
+      {/* WhatsApp Modal */}
+      <WhatsAppVerificationModal
+        isOpen={showWhatsAppModal}
+        onClose={() => setShowWhatsAppModal(false)}
+        initialAppId={displayAppId}
+      />
 
       {/* Full Slip Modal if Print/Preview requested */}
       {showSlipModal && application && (

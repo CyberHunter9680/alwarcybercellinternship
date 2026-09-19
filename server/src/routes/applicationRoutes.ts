@@ -1,13 +1,17 @@
 import { Router } from 'express';
 import { ApplicationController } from '../controllers/applicationController.js';
 import { uploadResumeMiddleware } from '../middleware/uploadMiddleware.js';
-import { registrationLimiter } from '../middleware/rateLimiter.js';
+import { registrationLimiter, whatsappVerificationLimiter } from '../middleware/rateLimiter.js';
 import { requireAdminAuth } from '../middleware/authMiddleware.js';
 
 const router = Router();
 
 // Public registration open/closed status
 router.get('/status', ApplicationController.getPublicRegistrationStatus);
+
+// Verify Application ID for Official WhatsApp Group Access (Rate-limited, Public, Zero PII)
+router.post('/verify-whatsapp', whatsappVerificationLimiter, ApplicationController.verifyWhatsAppApplication);
+router.get('/verify-whatsapp', whatsappVerificationLimiter, ApplicationController.verifyWhatsAppApplication);
 
 // Student submission endpoint with rate limiting & resume upload
 router.post(

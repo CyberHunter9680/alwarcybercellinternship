@@ -105,3 +105,12 @@ export const updateStatusSchema = z.object({
   }),
   remarks: z.string().trim().max(500, 'Remarks cannot exceed 500 characters').optional(),
 });
+
+export const verifyWhatsAppSchema = z.object({
+  applicationId: z
+    .string({ required_error: 'Application ID is required' })
+    .trim()
+    .min(1, 'Application ID is required')
+    .max(50, 'Application ID is too long'),
+});
+

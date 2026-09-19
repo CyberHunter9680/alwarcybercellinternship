@@ -1,10 +1,12 @@
 import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Shield, Lock, Menu, X, CheckCircle, FileText, UserCheck } from 'lucide-react';
+import { Shield, Lock, Menu, X, CheckCircle, FileText, UserCheck, MessageCircle } from 'lucide-react';
 import { useAuth } from '../context/AuthContext.js';
+import { WhatsAppVerificationModal } from './WhatsAppVerificationModal.js';
 
 export const Navbar: React.FC = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [isWhatsAppModalOpen, setIsWhatsAppModalOpen] = useState(false);
   const location = useLocation();
   const { isAuthenticated, admin } = useAuth();
 
@@ -73,6 +75,14 @@ export const Navbar: React.FC = () => {
               <a href="/#timeline" className="text-slate-200 hover:text-cyber-blue transition-colors">
                 Timeline
               </a>
+              <button
+                type="button"
+                onClick={() => setIsWhatsAppModalOpen(true)}
+                className="text-slate-200 hover:text-emerald-400 transition-colors flex items-center gap-1.5 cursor-pointer font-medium"
+              >
+                <MessageCircle className="w-4 h-4 text-emerald-400" />
+                <span>Join WhatsApp</span>
+              </button>
               <Link
                 to="/verify/check"
                 className={`transition-colors hover:text-cyber-blue flex items-center gap-1.5 ${
@@ -176,6 +186,16 @@ export const Navbar: React.FC = () => {
               >
                 Timeline
               </a>
+              <button
+                type="button"
+                onClick={() => {
+                  setMobileMenuOpen(false);
+                  setIsWhatsAppModalOpen(true);
+                }}
+                className="w-full text-left py-2 px-3 rounded hover:bg-police-800 text-slate-200 flex items-center gap-2 font-medium text-emerald-400 cursor-pointer"
+              >
+                <MessageCircle className="w-4 h-4 text-emerald-400" /> Join WhatsApp Group
+              </button>
               <Link
                 to="/verify/check"
                 onClick={() => setMobileMenuOpen(false)}
@@ -225,6 +245,13 @@ export const Navbar: React.FC = () => {
           )}
         </div>
       )}
+
+      {/* WhatsApp Modal */}
+      <WhatsAppVerificationModal
+        isOpen={isWhatsAppModalOpen}
+        onClose={() => setIsWhatsAppModalOpen(false)}
+      />
     </header>
   );
 };
+

@@ -25,4 +25,7 @@ export const ENV = {
   REGISTRATION_RATE_LIMIT_WINDOW_MS: parseInt(process.env.REGISTRATION_RATE_LIMIT_WINDOW_MS || '900000', 10), // 15 mins
   REGISTRATION_RATE_LIMIT_MAX: parseInt(process.env.REGISTRATION_RATE_LIMIT_MAX || '1000', 10), // 1000 registrations per 15 mins (allows shared college Wi-Fi while blocking automated flood bots)
   LOGIN_RATE_LIMIT_MAX: parseInt(process.env.LOGIN_RATE_LIMIT_MAX || '5', 10),
+  WHATSAPP_GROUP_URL:
+    process.env.WHATSAPP_GROUP_URL ||
+    'https://chat.whatsapp.com/IMDlwTEFRtK5DSOUyavJ2P?s=cl&p=a&mlu=4&ilr=4',
 };

@@ -10,6 +10,7 @@ import { Home } from './pages/Home.js';
 import { Register } from './pages/Register.js';
 import { RegistrationSuccess } from './pages/RegistrationSuccess.js';
 import { VerifyApplication } from './pages/VerifyApplication.js';
+import { WhatsAppJoin } from './pages/WhatsAppJoin.js';
 
 // Admin Pages
 import { AdminLogin } from './pages/admin/AdminLogin.js';
@@ -73,6 +74,8 @@ export const App: React.FC = () => {
                 <Route path="/registration-success" element={<RegistrationSuccess />} />
                 <Route path="/verify/:applicationId" element={<VerifyApplication />} />
                 <Route path="/verify/check" element={<VerifyApplication />} />
+                <Route path="/whatsapp" element={<WhatsAppJoin />} />
+                <Route path="/whatsapp-group" element={<WhatsAppJoin />} />
 
                 {/* Admin Auth Route */}
                 <Route path="/admin/login" element={<AdminLogin />} />

@@ -7,6 +7,8 @@ import { StorageService } from '../services/storageService.js';
 import { PDFService } from '../services/pdfService.js';
 import { AdminService } from '../services/adminService.js';
 import { SystemService } from '../services/systemService.js';
+import { AuditService } from '../services/auditService.js';
+import { prisma } from '../config/db.js';
 import { sendSuccess, sendError } from '../utils/responseHelper.js';
 import { ENV } from '../config/env.js';
 
@@ -371,5 +373,101 @@ export class ApplicationController {
       next(error);
     }
   }
+
+  /**
+   * Secure public endpoint to verify Application ID and return official WhatsApp group invite URL
+   * Strictly avoids leaking student PII (name, email, mobile, marks, university, etc.)
+   */
+  static async verifyWhatsAppApplication(req: Request, res: Response, next: NextFunction) {
+    try {
+      const ipAddress =
+        (req.headers['x-forwarded-for'] as string)?.split(',')[0]?.trim() ||
+        req.socket.remoteAddress ||
+        'unknown';
+      const userAgent = req.headers['user-agent'] || 'unknown';
+
+      const rawAppId = req.body?.applicationId ?? req.query?.applicationId;
+
+      if (!rawAppId || typeof rawAppId !== 'string' || rawAppId.trim() === '') {
+        return res.status(400).json({
+          success: false,
+          verified: false,
+          message: 'Application ID could not be verified. Please check your Application ID and try again.',
+        });
+      }
+
+      // Safe normalization & sanitization
+      const cleanAppId = rawAppId.trim().toUpperCase();
+
+      // Format sanity check: alphanumeric and standard hyphens/underscores only, between 3 and 50 chars
+      if (cleanAppId.length < 3 || cleanAppId.length > 50 || !/^[A-Z0-9_-]+$/.test(cleanAppId)) {
+        return res.status(400).json({
+          success: false,
+          verified: false,
+          message: 'Application ID could not be verified. Please check your Application ID and try again.',
+        });
+      }
+
+      // Query database for existing application without selecting PII
+      const application = await prisma.application.findFirst({
+        where: {
+          OR: [
+            { applicationId: cleanAppId },
+            { id: cleanAppId },
+          ],
+        },
+        select: {
+          id: true,
+          applicationId: true,
+        },
+      });
+
+      if (!application) {
+        // Record failed attempt in audit log without storing sensitive data
+        await AuditService.log({
+          action: 'WHATSAPP_APPLICATION_VERIFICATION',
+          details: `Failed verification attempt for query: ${cleanAppId.slice(0, 15)}...`,
+          ipAddress,
+          userAgent,
+        });
+
+        return res.status(400).json({
+          success: false,
+          verified: false,
+          message: 'Application ID could not be verified. Please check your Application ID and try again.',
+        });
+      }
+
+      // Record successful verification in audit log
+      await AuditService.log({
+        applicationId: application.id,
+        action: 'WHATSAPP_APPLICATION_VERIFICATION',
+        details: 'Application successfully verified for WhatsApp group access.',
+        ipAddress,
+        userAgent,
+      });
+
+      // Return strictly the verification status and official WhatsApp link (No PII)
+      return res.status(200).json({
+        success: true,
+        verified: true,
+        message: 'Application verified successfully.',
+        whatsappGroupUrl: ENV.WHATSAPP_GROUP_URL,
+        data: {
+          verified: true,
+          message: 'Application verified successfully.',
+          whatsappGroupUrl: ENV.WHATSAPP_GROUP_URL,
+        },
+      });
+    } catch (error) {
+      console.error('⚠️ WhatsApp Verification Error:', error);
+      return res.status(500).json({
+        success: false,
+        verified: false,
+        message: 'An unexpected server error occurred during verification. Please try again.',
+      });
+    }
+  }
 }
+
 

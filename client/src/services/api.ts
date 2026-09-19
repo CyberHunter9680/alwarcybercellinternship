@@ -88,6 +88,22 @@ export async function verifyApplicationPublic(
   return response.data.data;
 }
 
+export interface VerifyWhatsAppResponse {
+  verified: boolean;
+  message: string;
+  whatsappGroupUrl: string;
+}
+
+export async function verifyWhatsAppApplication(
+  applicationId: string
+): Promise<VerifyWhatsAppResponse> {
+  const response = await api.post('/applications/verify-whatsapp', {
+    applicationId: applicationId.trim(),
+  });
+  return response.data.data || response.data;
+}
+
+
 /* =========================================================
    ADMIN PORTAL APIS
 ========================================================= */

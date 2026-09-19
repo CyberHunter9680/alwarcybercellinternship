@@ -49,3 +49,21 @@ export const registrationLimiter = rateLimit({
     message: 'Too many registration requests received from this network. Please try again after a few minutes.',
   },
 });
+
+/**
+ * Rate limiter for WhatsApp application verification attempts
+ * Prevents automated ID enumeration / brute-force attacks while allowing legitimate candidate lookups
+ */
+export const whatsappVerificationLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 30, // 30 verification checks per 15 minutes per IP
+  standardHeaders: true,
+  legacyHeaders: false,
+  validate: { trustProxy: false, xForwardedForHeader: false },
+  message: {
+    success: false,
+    verified: false,
+    message: 'Too many verification attempts from this network. Please try again after 15 minutes.',
+  },
+});
+

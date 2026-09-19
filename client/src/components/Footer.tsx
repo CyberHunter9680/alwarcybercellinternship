@@ -58,6 +58,11 @@ export const Footer: React.FC = () => {
                 </Link>
               </li>
               <li>
+                <Link to="/whatsapp" className="hover:text-cyber-blue transition-colors text-emerald-400 font-semibold flex items-center gap-1">
+                  <span>→ Join Official WhatsApp Group</span>
+                </Link>
+              </li>
+              <li>
                 <Link to="/verify/check" className="hover:text-cyber-blue transition-colors">
                   Live Application Status Verification
                 </Link>
